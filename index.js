@@ -2,7 +2,7 @@ var express = require('express');
 var path = require('path');
 var bodyparser = require('body-parser');
 var fileUpload = require('express-fileupload');
-const port = process.env.DEV_PORT || 3000 ; 
+
 
 const app = express();
  
@@ -17,6 +17,6 @@ app.get("/",(req,res)=>{
     res.send("This is deployed")
 })
 
-app.listen(port, (error)=>{
-    console.log(`Listening to port ${port}`)
+app.listen( process.env.DEV_PORT || 3000 , (error)=>{
+    console.log(`Listening`)
 })
