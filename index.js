@@ -17,6 +17,6 @@ app.get("/",(req,res)=>{
     res.send("This is deployed")
 })
 
-app.listen( process.env.DEV_PORT || 3000 , (error)=>{
+app.listen( process.env.PORT || 3000 , (error)=>{
     console.log(`Listening`)
 })
