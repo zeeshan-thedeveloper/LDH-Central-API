@@ -32,22 +32,22 @@ const createAdminAccount = (req,res)=>{
     //     res.send({responseMessage:"This is method for creating admin account"});
     // }) 
 
-    firestore.collection("users").add({
-        first: "Tuba",
-        last: "Asif",
-        born: 1815
-    })
-    .then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        res.send({responseMessage:`Docuemnt written with ID : ${docRef.id}`}); 
-    })
-    .catch((error) => {
+    // firestore.collection("users").add({
+    //     first: "Tuba",
+    //     last: "Asif",
+    //     born: 1815
+    // })
+    // .then((docRef) => {
+    //     console.log("Document written with ID: ", docRef.id);
+    //     res.send({responseMessage:`Docuemnt written with ID : ${docRef.id}`}); 
+    // })
+    // .catch((error) => {
         
-        console.error("Error adding document: ", error);
-        res.send({responseMessage:"This is method for creating admin account"}); 
-    });
+    //     console.error("Error adding document: ", error);
+    //     res.send({responseMessage:"This is method for creating admin account"}); 
+    // });
 
-    // res.send({responseMessage:"This is method for creating admin account"}); 
+    res.send({responseMessage:"This is method for creating admin account"}); 
 }
 
 module.exports = {createAdminAccount}
