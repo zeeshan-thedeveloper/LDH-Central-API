@@ -31,7 +31,8 @@
     "mongoose": "^6.3.5",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.16",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "swagger-ui-express": "^4.4.0"
   },
   "devDependencies": {
     "@babel/helper-compilation-targets": "^7.18.2"

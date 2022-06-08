@@ -1,0 +1,33 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0", 
+      "title": "Central-API",
+      "description": "This is central api designed for local database hosting",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "host": "localhost:3000",
+    "basePath": "/",
+    "schemes": ["http"],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "paths":{
+        "/auth-api/loginToAdminAccount":{
+            "get":{
+                "tags":["Sign in [Admin Account]"],
+                "summary":"This will be used for loginin in admin account",
+                "responses": {
+                    "200":{
+                        "description":"Login Successful"
+                    },
+                    "301":{
+                        "description":"Could not login with given credentials"
+                    }
+                }
+            }
+        }
+    }
+}

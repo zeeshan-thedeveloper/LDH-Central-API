@@ -4,6 +4,10 @@ var bodyparser = require('body-parser');
 var fileUpload = require('express-fileupload');
 var morgan = require('morgan')
 
+// SWAGGER
+const swaggerUi = require("swagger-ui-express"),
+swaggerDocument = require('./swagger.json');
+
 // Emiter
 var emiter = require('./events-engine/Emiters')
 var events = require('./events-engine/Events')
@@ -22,11 +26,17 @@ app.set('view engine', 'ejs')
 app.use(fileUpload())
 app.use(morgan('combined'))
 
+app.use(
+    '/api-docs',
+    swaggerUi.serve, 
+    swaggerUi.setup(swaggerDocument)
+);
 
 // Maping routes.
 app.use("/auth-api",authRouter)
 
 app.listen( process.env.PORT || 3000 , (error)=>{
+    const port = process.env.PORT;
     if(!error) {
         emiter.emit(events.INIT_CACHE);
         console.log(`Listening`)

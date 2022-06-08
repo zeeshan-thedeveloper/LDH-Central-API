@@ -67,9 +67,9 @@ const loginToAdminAccount = (req, res) => {
   // })
   // requestsListCache.put("requestsListCache",updatedList)
   // console.log(updatedList)
-  res.send({ responseMessage: "This is method for log in the admin account" });
+  res.status(200).send({ responseMessage: "This is method for log in the admin account" });
 };
 module.exports = { 
     createAdminAccount,
     loginToAdminAccount,
- };
+};

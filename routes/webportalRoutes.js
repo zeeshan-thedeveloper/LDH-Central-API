@@ -4,7 +4,7 @@ const authRouter=express()
 
 // Auth router
 authRouter.post("/createAdminAccount",authController.createAdminAccount);
-authRouter.post("/loginToAdminAccount",authController.loginToAdminAccount);
+authRouter.get("/loginToAdminAccount",authController.loginToAdminAccount);
 
 module.exports = {
     authRouter
