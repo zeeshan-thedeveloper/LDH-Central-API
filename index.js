@@ -4,6 +4,10 @@ var bodyparser = require('body-parser');
 var fileUpload = require('express-fileupload');
 var morgan = require('morgan')
 
+// Cache
+const {requestsListCache} = require('./cache-store/cache')
+
+// Routes
 const {authRouter} = require('./routes/webportalRoutes');
 
 const app = express();
@@ -16,10 +20,13 @@ app.set('view engine', 'ejs')
 app.use(fileUpload())
 app.use(morgan('combined'))
 
+
+// Maping routes.
 app.use("/auth-api",authRouter)
 
 app.listen( process.env.PORT || 3000 , (error)=>{
     if(!error) {
+        requestsListCache.put("requestsListCache",[]);
         console.log(`Listening`)
     }
 })

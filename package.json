@@ -26,6 +26,8 @@
     "express-fileupload": "^1.4.0",
     "firebase": "^8.10.1",
     "firebase-admin": "^10.2.0",
+    "immer": "^9.0.14",
+    "memory-cache": "^0.2.0",
     "mongoose": "^6.3.5",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.16",
