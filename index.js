@@ -4,9 +4,11 @@ var bodyparser = require('body-parser');
 var fileUpload = require('express-fileupload');
 var morgan = require('morgan')
 
-// Cache
-const {requestsListCache} = require('./cache-store/cache')
-
+// Emiter
+var emiter = require('./events-engine/Emiters')
+var events = require('./events-engine/Events')
+const {initEvents} = require('./events-engine/Listeners')
+initEvents();
 // Routes
 const {authRouter} = require('./routes/webportalRoutes');
 
@@ -26,7 +28,7 @@ app.use("/auth-api",authRouter)
 
 app.listen( process.env.PORT || 3000 , (error)=>{
     if(!error) {
-        requestsListCache.put("requestsListCache",[]);
+        emiter.emit(events.INIT_CACHE);
         console.log(`Listening`)
     }
 })

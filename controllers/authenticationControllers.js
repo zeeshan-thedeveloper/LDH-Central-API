@@ -1,9 +1,7 @@
 const {requestsListCache} = require('../cache-store/cache')
-const {produce} = require('immer')
-
 const { firestore, admin } = require("../firebase-database/firebase-connector");
 const createAdminAccount = (req, res) => {
-
+  
   // const list = requestsListCache.get("requestsListCache")
   // const updatedList = produce(list,draftList=>{
   //   draftList.push({
@@ -12,7 +10,6 @@ const createAdminAccount = (req, res) => {
   // })
   // requestsListCache.put("requestsListCache",updatedList)
   // console.log(updatedList)
-
 
   // creating account
   // let defaultProfile = "https://firebasestorage.googleapis.com/v0/b/discussion-manager.appspot.com/o/profileDeafultImages%2Fdefault_image.png?alt=media&token=432b7002-1168-4678-8339-eca37d06d25a"
