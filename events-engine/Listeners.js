@@ -4,8 +4,6 @@ const {produce} = require('immer')
 
 // Cache
 const {requestsListCache} = require('../cache-store/cache')
-
-
 module.exports = {initEvents:()=>{
     emiter.on(events.INIT_CACHE,()=>{
         requestsListCache.put("requestsListCache",[]);

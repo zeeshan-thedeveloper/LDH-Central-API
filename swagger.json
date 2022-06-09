@@ -15,13 +15,26 @@
     "consumes": ["application/json"],
     "produces": ["application/json"],
     "paths":{
-        "/auth-api/loginToAdminAccount":{
-            "get":{
-                "tags":["Sign in [Admin Account]"],
-                "summary":"This will be used for loginin in admin account",
+        "/auth-api/createAdminAccount":{
+            "post":{
+                "tags":["Create Account [Admin]"],
+                "summary":"This will be used to create the admin account",
+                "parameters":[
+                    {
+                        "name": "Admin-User",
+                        "in": "body",
+                        "description": "User that we want to create",
+                        "schema": {
+                          "$ref": "#/definitions/Input-CreateAdminAccount"
+                        }
+                    }
+                ],
                 "responses": {
                     "200":{
-                        "description":"Login Successful"
+                        "description":"Login Successful",
+                        "schema":{
+                            "$ref":"#/definitions/Response-CreateAdminAccount-200"
+                        }
                     },
                     "301":{
                         "description":"Could not login with given credentials"
@@ -29,5 +42,64 @@
                 }
             }
         }
+    },
+    "definitions":{
+        "Input-CreateAdminAccount":{
+            "required":["userName","password"],
+            "properties":{
+                   "email":{
+                       "type":"string",
+                       "example":"zeeshanahmedd0010@gmail.com"
+                   },
+                   "phoneNumber":{
+                       "type":"string",
+                       "example":"+923053206339"
+                   },
+                   "password":{
+                       "type":"string",
+                       "example":"4125142"
+                   },
+                   "emailVerified":{
+                       "type":"boolean",
+                       "example":"false"
+                   },
+                   "displayName":{
+                       "type":"string",
+                       "example":"Zeeshan Ahmed"
+                   },
+                   "address":{
+                       "type":"string",
+                       "example":"City Sukkur"
+                   },
+                   "onlineStatus":{
+                       "type":"string",
+                       "example":"Online"
+                   },
+                   "photoUrl":{
+                       "type":"string",
+                       "example":"https://firebasestorage.googleapis.com/v0/b/discussion-manager.appspot.com/o/profileDeafultImages%2Fdefault_image.png?alt=media&token=432b7002-1168-4678-8339-eca37d06d25a"
+                   },
+                   "disabled":{
+                       "type":"boolean",
+                       "example":"false"
+                   }
+            }
+        },
+        "Response-CreateAdminAccount-200":{
+            "properties":{
+                "responseMessage":{
+                    "type":"string",
+                    "example":"Account created successfuly"
+                },
+                "responsePayload":{
+                    "type":"object",
+                    "example":{
+                        "sessionToken":"<AUTO-GENERATE-TOKEN>",
+                        "user-uid":"<AUTO-GENERATE-TOKEN>"
+                    }
+                }
+            }
+        }
+        
     }
 }
