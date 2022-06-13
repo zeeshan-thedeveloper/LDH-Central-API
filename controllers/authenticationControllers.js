@@ -6,6 +6,7 @@ const createAdminAccount = (req, res) => {
 const loginToAdminAccount = (req, res) => {
   res.status(200).send({ responseMessage: "This is method for log in the admin account" });
 };
+
 module.exports = { 
     createAdminAccount,
     loginToAdminAccount,
