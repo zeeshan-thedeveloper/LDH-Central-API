@@ -6,6 +6,10 @@ const authRouter=express()
 authRouter.get("/onGoogleAuthSucess",authController.onGoogleAuthSucess);
 authRouter.get("/onGoogleAuthFailure",authController.onGoogleAuthFailure);
 authRouter.get("/logoutGoogleAccount",authController.logoutGoogle);
+
+authRouter.get("/onGithubAuthSucess",authController.onGithubAuthSucess);
+authRouter.get("/onGithubAuthFailure",authController.onGithubAuthFailure);
+
 authRouter.post("/createAdminAccount",authController.createAdminAccount);
 authRouter.post("/loginToAdminAccount",authController.loginToAdminAccount);
 

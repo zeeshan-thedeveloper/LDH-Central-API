@@ -60,26 +60,19 @@ app.use(
 app.use("/auth-api",authRouter)
  
 
-// google authentication
+// Google authentication
 app.get('/auth-api/googleAuthentication',
   passport.authenticate('google', { scope: [ 'email', 'profile' ] }
 ));
 
+// Github Auhentication
 
-function isLoggedIn(req, res, next) {
-  
-    console.log(req.cookies)
-    if(req.user){
-        console.log("looged in ") 
-        console.log(req.user)
-        next();
-    }
-    else{
-        console.log("Not looged in ")
-        console.log(req.user)
-        res.status(401).send({responseMessage:"Un-authorized"})
-    }
-}
+app.get('/auth-api/githubAuhentication',
+  passport.authenticate('github', { scope: [ 'user:email' ] }
+));  
+
+
+// Authentication callbacks
 
 app.get( '/google/callback',
   passport.authenticate( 'google', {
@@ -88,26 +81,24 @@ app.get( '/google/callback',
   })
 );
 
+app.get( '/github/callback',
+    passport.authenticate('github', { failureRedirect: '/auth-api/onGithubAuthFailuer' }),
+    function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/auth-api/onGithubAuthSucess');
+});
 
-
-// app.get("/onGoogleAuthSucess",(req,res)=>{
+// app.get("/onGithubAuthSucess",(req,res)=>{
 //     console.log("At protected gooogle")
 //     console.log(req.user);
 //     res.cookie("logged-in-user",req.user)
 //     res.send("yes we are in")
 // })
 
-// app.get("/onGoogleAuthFailuer",(req, res) => {
+// app.get("/onGithubAuthFailuer",(req, res) => {
 //     res.send("google auth-fail");
 // })
 
-// app.get("/auth-api/logout",(req,res)=>{
-//      req.logout(req.user, err => {
-//         if(err) return next(err);
-//         req.session.destroy();
-//         res.send("logedout")
-//     });
-// })
 
 
 app.listen( /*process.env.PORT *||*/ 3000 , (error)=>{

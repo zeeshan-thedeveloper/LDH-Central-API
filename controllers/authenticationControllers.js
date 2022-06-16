@@ -4,6 +4,7 @@ const { firestore, admin } = require("../firebase-database/firebase-connector");
 const {admin_user_schema} = require("../mongodb/schemas/admin-schemas/admin-users");
 
 
+// ----------------------------- GOOGLE Auth -------------------
 
 const onGoogleAuthSucess = (req, res) => {
   // when google authentication is successful
@@ -25,6 +26,22 @@ const logoutGoogle= (req, res) => {
   });
 }
 
+// ----------------------------- Github -----------------------------
+
+const onGithubAuthSucess = (req, res) => {
+  // when Github authentication is successful
+  console.log("Github-Auth-success",req.user);
+  res.send("Github authentication is successful");
+}
+
+const onGithubAuthFailure = (req, res) => {
+ // when Github authentication is unsuccessful
+  console.log("Github-Auth-fail",req.user);
+  res.send("Github authentication is not successful")
+}
+
+
+
 const createAdminAccount = (req, res) => {
   res.send({ responseMessage: "This is method for creating admin account" });
 };
@@ -33,7 +50,8 @@ const loginToAdminAccount = (req, res) => {
 };
  
 module.exports = { 
-
+    onGithubAuthSucess,
+    onGithubAuthFailure,
     onGoogleAuthSucess,
     onGoogleAuthFailure,
     logoutGoogle,
