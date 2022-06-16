@@ -70,7 +70,9 @@ app.get('/auth-api/googleAuthentication',
 app.get('/auth-api/githubAuhentication',
   passport.authenticate('github', { scope: [ 'user:email' ] }
 ));  
-
+app.get("/",(req, res)=>{
+    res.send("its working")
+})
 
 // Authentication callbacks
 
