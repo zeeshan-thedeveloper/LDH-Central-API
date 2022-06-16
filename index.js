@@ -70,6 +70,7 @@ app.get('/auth-api/googleAuthentication',
 app.get('/auth-api/githubAuhentication',
   passport.authenticate('github', { scope: [ 'user:email' ] }
 ));  
+
 app.get("/",(req, res)=>{
     res.send("its working")
 })
@@ -103,7 +104,7 @@ app.get( '/github/callback',
 
 
 
-app.listen( /*process.env.PORT *||*/ 3000 , (error)=>{
+app.listen( process.env.PORT || 3000 , (error)=>{
     const port = process.env.PORT;
     if(!error) {
         emiter.emit(events.INIT_CACHE);
