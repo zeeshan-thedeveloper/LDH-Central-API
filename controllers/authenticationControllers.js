@@ -12,12 +12,18 @@ const onGoogleAuthSucess = (req, res) => {
 }
 
 const onGoogleAuthFailure = (req, res) => {
-  console.log("Google-Auth-fail",req.user);
  // when google authentication is unsuccessful
+  console.log("Google-Auth-fail",req.user);
   res.send("google authentication is not successful")
 }
 
-
+const logoutGoogle= (req, res) => {
+  req.logout(req.user, err => {
+            if(err) return next(err);
+            req.session.destroy();
+            res.send("logout from google account")
+  });
+}
 
 const createAdminAccount = (req, res) => {
   res.send({ responseMessage: "This is method for creating admin account" });
@@ -30,6 +36,7 @@ module.exports = {
 
     onGoogleAuthSucess,
     onGoogleAuthFailure,
+    logoutGoogle,
     createAdminAccount,
     loginToAdminAccount,
 };
