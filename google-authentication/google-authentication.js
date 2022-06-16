@@ -8,7 +8,9 @@ const GithubStrategy = require('passport-github2').Strategy;
 passport.use(new GoogleStrategy({
     clientID: "1021611673334-buf3dq11lnl5hb17jd5ohbvkhhkgh93d.apps.googleusercontent.com",
     clientSecret: "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",
-    callbackURL:"https://central-api-ldh.herokuapp.com/google/callback",
+    // callbackURL:"https://central-api-ldh.herokuapp.com/google/callback",
+    callbackURL:"http://localhost:3003/google/callback", //change to above 
+    
     passReqToCallback: true,
   },  
 

@@ -9,7 +9,9 @@ const {admin_user_schema} = require("../mongodb/schemas/admin-schemas/admin-user
 const onGoogleAuthSucess = (req, res) => {
   // when google authentication is successful
   console.log("Google-Auth-success",req.user);
-  res.send("google authentication is successful");
+  // res.send("google authentication is successful");
+  // Change following url to vercel url
+  res.redirect(`http://localhost:3000/Authentication/SignIn?id=${req.user!=undefined ? req.user.id : ''}`)
 }
 
 const onGoogleAuthFailure = (req, res) => {

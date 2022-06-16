@@ -44,7 +44,9 @@ app.set('view engine', 'ejs')
 app.use(fileUpload())
 app.use(morgan('combined')) 
 app.use(cookieParser())
-app.use(cors());
+app.use(cors({
+  origin: '*'
+}));
 app.use(session({ secret: 'cats', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -91,20 +93,11 @@ app.get( '/github/callback',
     res.redirect('/auth-api/onGithubAuthSucess');
 });
 
-// app.get("/onGithubAuthSucess",(req,res)=>{
-//     console.log("At protected gooogle")
-//     console.log(req.user);
-//     res.cookie("logged-in-user",req.user)
-//     res.send("yes we are in")
-// })
-
-// app.get("/onGithubAuthFailuer",(req, res) => {
-//     res.send("google auth-fail");
-// })
 
 
 
-app.listen( process.env.PORT || 3000 , (error)=>{
+
+app.listen( /*process.env.PORT ||*/ 3003 , (error)=>{
     const port = process.env.PORT;
     if(!error) {
         emiter.emit(events.INIT_CACHE);
