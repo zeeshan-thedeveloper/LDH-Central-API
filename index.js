@@ -43,7 +43,7 @@ app.set('view engine', 'ejs')
 
 app.use(fileUpload())
 app.use(morgan('combined')) 
-app.use(cookieParser())
+app.use(cookieParser())   
 app.use(cors({
   origin: '*'
 }));
@@ -65,7 +65,7 @@ app.use("/auth-api",authRouter)
 // Google authentication
 app.get('/auth-api/googleAuthentication',
   passport.authenticate('google', { scope: [ 'email', 'profile' ] }
-));
+)); 
 
 // Github Auhentication
 

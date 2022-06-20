@@ -23,8 +23,9 @@ passport.use(new GoogleStrategy({
 passport.use(new GithubStrategy({
     clientID: "6984bbc1aa582cb223bd",
     clientSecret: "170b1655619c72d6c55715be308c6f37417751f1",
-    callbackURL: "https://central-api-ldh.herokuapp.com/github/callback"
-},
+    // callbackURL: "https://central-api-ldh.herokuapp.com/github/callback"
+    callbackURL: "http://localhost:3003/github/callback"  
+  },
 
   function(accessToken, refreshToken, profile, done) {
       return done(null, profile);
