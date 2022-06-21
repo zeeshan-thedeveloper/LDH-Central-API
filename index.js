@@ -8,23 +8,34 @@ const passport = require('passport');
 const session = require('express-session');
 const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser')
-require('./google-authentication/google-authentication');
+const dotenv = require('dotenv');
+
+require('./authentication/google-authentication');
+
 // .env
 require('dotenv').config();
 
 // Mongodb
 
-// require('./mongodb/mongodb-connector')
+require('./mongodb/mongodb-connector')
 
 // SWAGGER
 const swaggerUi = require("swagger-ui-express"),
 swaggerDocument = require('./swagger.json');
 
+// configurations of enviroment varaible
+dotenv.config();
+
 // Emiter
 var emiter = require('./events-engine/Emiters')
 var events = require('./events-engine/Events')
 const {initEvents} = require('./events-engine/Listeners')
+
 initEvents();
+
+
+// Cache
+require('./cache-store/cache')
 
 // jwt token
 require('./token-manager/token-manager')

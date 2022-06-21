@@ -28,10 +28,19 @@ const admin_user = new mongoose.Schema({
         type: String,
         required: true,
     },
-
-
+    googleAccountData:{
+        type:Object,
+        required: false,
+    },
+    githubAccountData:{
+        type:Object,
+        required: false,
+    }
 });
 
-const admin_user_schema = mongoose.model("admin_user_schema", admin_user);
 
-module.exports = {admin_user_schema};
+const admin_users_schema = mongoose.model("admin_users_schema", admin_user);
+
+
+
+module.exports = {admin_users_schema};

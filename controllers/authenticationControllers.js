@@ -3,6 +3,8 @@ const {requestsListCache} = require('../cache-store/cache')
 const { firestore, admin } = require("../firebase-database/firebase-connector");
 const {admin_user_schema} = require("../mongodb/schemas/admin-schemas/admin-users");
 const {encrypt} = require('../encryptionAndDecryption/encryptionAndDecryption')
+var emiter = require('../events-engine/Emiters');
+var events = require('../events-engine/Events');
 
 // ----------------------------- GOOGLE Auth -------------------
 
@@ -11,6 +13,9 @@ const onGoogleAuthSucess = (req, res) => {
   console.log("Google-Auth-success",req.user);
   // res.send("google authentication is successful");
   // Change following url to vercel url
+  
+  emiter.emit(events.ADD_ITEM_admin_account_cache,req.user);
+ 
   const user_Id = encrypt(req.user.id);
   res.redirect(`http://localhost:3000/Authentication/SignIn?id=${user_Id!=undefined ? user_Id : ''}`)
 }
@@ -49,9 +54,17 @@ const createAdminAccount = (req, res) => {
   res.send({ responseMessage: "This is method for creating admin account" });
 };
 const loginToAdminAccount = (req, res) => {
-  res.status(200).send({ responseMessage: "This is method for log in the admin account" });
+  res.status(200).send({ responseMessage: "This is method for login the admin account" });
 };
- 
+
+
+// tester end-points
+
+const test=(req,res)=>{
+  emiter.emit(events.GET_ITEM_admin_account_cache,{});
+  res.send({responseMessage: "It is test end-point"})
+}
+
 module.exports = { 
     onGithubAuthSucess,
     onGithubAuthFailure,
@@ -60,4 +73,5 @@ module.exports = {
     logoutGoogle,
     createAdminAccount,
     loginToAdminAccount,
+    test
 };
