@@ -2,9 +2,17 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr('zeethejinandtubathechurail');
 module.exports ={
     encrypt: (data)=>{
-        return cryptr.encrypt(data);
+        try{
+          return  cryptr.encrypt(data);
+        }catch(error){
+          return null;
+        }
     },
     decrypt: (data)=>{
-        return cryptr.decrypt(data);
+        try{
+            return  cryptr.decrypt(data);
+          }catch(error){
+            return null;
+          }
     }
 }

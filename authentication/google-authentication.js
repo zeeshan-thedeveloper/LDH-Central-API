@@ -15,7 +15,7 @@ passport.use(new GoogleStrategy({
   },  
 
   function(request, accessToken, refreshToken, profile, done) {
-    return done(null, profile);
+    return done(null,profile,refreshToken,accessToken);
   }));
 
   // Github strategy

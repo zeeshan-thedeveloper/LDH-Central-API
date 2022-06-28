@@ -46,7 +46,7 @@ const {authRouter} = require('./routes/webportalRoutes');
 const app = express();
 
 app.use(bodyparser.json())
-app.use(bodyparser.urlencoded({extended: true}));
+app.use(bodyparser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')))
 app.set('views',path.join(__dirname, 'views'))
 
@@ -72,7 +72,6 @@ app.use(
 // Maping routes.
 app.use("/auth-api",authRouter)
  
-
 // Google authentication
 app.get('/auth-api/googleAuthentication',
   passport.authenticate('google', { scope: [ 'email', 'profile' ] }
@@ -83,6 +82,7 @@ app.get('/auth-api/googleAuthentication',
 app.get('/auth-api/githubAuhentication',
   passport.authenticate('github', { scope: [ 'user:email' ] }
 ));  
+
 
 app.get("/",(req, res)=>{
     res.send("its working")
@@ -103,10 +103,6 @@ app.get( '/github/callback',
     // Successful authentication, redirect home.
     res.redirect('/auth-api/onGithubAuthSucess');
 });
-
-
-
-
 
 app.listen( /*process.env.PORT ||*/ 3003 , (error)=>{
     const port = process.env.PORT;

@@ -8,9 +8,10 @@ const admin_user = new mongoose.Schema({
         type: String,
         required: true,
       },
-    email: {
+    email:{
         type: String,
         required: true,
+        unique: true,
       },
     profilePhotoUrl:{
         type: String,
@@ -20,11 +21,7 @@ const admin_user = new mongoose.Schema({
         type: String,
         required: true,
     },
-    tokenId:{
-        type: String,
-        required: true,
-    },
-    accessToken:{
+    jwtToken:{
         type: String,
         required: true,
     },
@@ -38,9 +35,6 @@ const admin_user = new mongoose.Schema({
     }
 });
 
-
 const admin_users_schema = mongoose.model("admin_users_schema", admin_user);
-
-
 
 module.exports = {admin_users_schema};
