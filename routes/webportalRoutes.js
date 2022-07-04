@@ -10,6 +10,9 @@ authRouter.get("/onGithubAuthSucess",authController.onGithubAuthSucess);
 authRouter.get("/onGithubAuthFailure",authController.onGithubAuthFailure);
 authRouter.post("/createAdminAccount",authController.createAdminAccount);
 authRouter.post("/loginToAdminAccount",authController.loginToAdminAccount);
+authRouter.post("/  ",authController.verifyJWTToken);
+authRouter.post("/getJwtToken",authController.getJWTToken);
+
 authRouter.get("/test",authController.test);
 
 module.exports = {

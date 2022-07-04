@@ -38,7 +38,7 @@ initEvents();
 require('./cache-store/cache')
 
 // jwt token
-require('./token-manager/token-manager')
+const {generateTokenWithId,verifyToken} =  require('./token-manager/token-manager')
 
 // Routes
 const {authRouter} = require('./routes/webportalRoutes');
@@ -111,3 +111,7 @@ app.listen( /*process.env.PORT ||*/ 3003 , (error)=>{
         console.log(`Listening`)
     } 
 })
+
+module.exports = {
+  generateTokenWithId,verifyToken
+}
