@@ -148,9 +148,44 @@ const createAdminAccount = async (req, res) => {
   }
 };
 
+
 const getListOfAdminAccounts = (req, res) => {
 
   admin_users_schema.find({}, (err, data) => {
+    if(err) {
+      res
+      .status(200)
+      .send({ 
+        responseCode:COULD_NOT_FETCH,
+        responseMessage:
+         "Error in fetching list of admins",
+         payload: err
+         });
+    }
+    else{
+      // console.log(data)
+      let results = data.map((record)=>{
+        return {
+          firstName: record.firstName,
+          lastName: record.lastName,
+          email: record.email,  
+          profilePhotoUrl:record.profilePhotoUrl   
+        }
+      })
+      res.status(200).send({ 
+          responseMessage: " Data fetched successfully ",
+          responseCode: FETCHED,
+          responsePayload:results
+      })
+    }
+  })
+
+ 
+};
+
+const getListOfDeveloperAccounts = (req, res) => {
+
+  developers_users_schema.find({}, (err, data) => {
     if(err) {
       res
       .status(200)
@@ -238,6 +273,7 @@ module.exports = {
   logoutGoogle,
   createAdminAccount,
   getListOfAdminAccounts,
+  getListOfDeveloperAccounts,
   verifyJWTToken,
   getJWTToken,
   test,
