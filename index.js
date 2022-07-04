@@ -41,8 +41,8 @@ require('./cache-store/cache')
 const {generateTokenWithId,verifyToken} =  require('./token-manager/token-manager')
 
 // Routes
-const {authRouter} = require('./routes/webportalRoutes');
-
+const {authRouter_webportal} = require('./routes/webportalRoutes');
+const {authRouter_desktopApp} = require('./routes/desktopappRoutes')
 const app = express();
 
 app.use(bodyparser.json())
@@ -70,8 +70,9 @@ app.use(
 );
 
 // Maping routes.
-app.use("/auth-api",authRouter)
- 
+app.use("/auth-api",authRouter_webportal);
+app.use("/auth-api",authRouter_desktopApp);
+
 // Google authentication
 app.get('/auth-api/googleAuthentication',
   passport.authenticate('google', { scope: [ 'email', 'profile' ] }
