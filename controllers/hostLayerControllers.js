@@ -8,6 +8,7 @@ const {
     v1: uuidv1,
     v4: uuidv4,
   } = require('uuid');
+const { admin_users_schema } = require('../mongodb/schemas/admin-schemas/admin-users');
 const { host_users_schema } = require('../mongodb/schemas/host-schemas/host-users');
 const { COULD_NOT_CREATE_ACCOUNT, ACCONT_CREATED, ALREADY_CREATED_ACCOUNT } = require('./responses/responses');
 
@@ -26,7 +27,7 @@ const addHostInRequestList = (req, res)=>{
 
     const notificationQueueId = uuidv1();
     
-
+    // Checking if already have created or requested or not?
     host_users_schema.findOne({hostId:hostId},(err,data)=>{
        if(data==null){
         const dataToInsert={
@@ -36,13 +37,35 @@ const addHostInRequestList = (req, res)=>{
             isConnected:false,
             notificationQueueId:notificationQueueId
         }
-        host_users_schema.create(dataToInsert,(err, insertedData)=>{
+        // Creating account for host
+        host_users_schema.create(dataToInsert,async (err, insertedData)=>{
         if(!err) {
-            res.status(200).send({
-                responseMessage:" Host added to waiting list successfully",
-                responseCode:ACCONT_CREATED,
-                responsePayload:insertedData
-            })
+
+            // updating the targeted admin
+            const record = await admin_users_schema.findOneAndUpdate(
+                { _id: adminId },
+                {
+                    $push : {
+                        connectedHostList :  hostId//inserted data is the object to be inserted 
+                      }
+                },
+                { new: true }
+              );
+            if(record) {
+                // updated the admin
+                res.status(200).send({
+                    responseMessage:" Host added to waiting list successfully",
+                    responseCode:ACCONT_CREATED,
+                    responsePayload:insertedData
+                })
+            } else{
+                res.status(200).send({
+                    responseMessage:"Could not update the admin record",
+                    responseCode:ACCONT_CREATED,
+                    responsePayload:insertedData
+                })
+            }
+            
         }
         else{
             res.status(501).send({
@@ -61,11 +84,7 @@ const addHostInRequestList = (req, res)=>{
             responsePayload:data
         })
        }
-    })
-    
-
-   
-    
+    }) 
 }
 
 const connectHostToAdmin = (req, res)=>{

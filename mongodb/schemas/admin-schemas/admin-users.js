@@ -25,6 +25,7 @@ const admin_user = new mongoose.Schema({
         type: String,
         required: true,
     },
+    connectedHostList:{ type : Array , "default" : [] },
     googleAccountData:{
         type:Object,
         required: false,
