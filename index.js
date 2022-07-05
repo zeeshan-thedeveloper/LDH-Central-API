@@ -41,8 +41,8 @@ require('./cache-store/cache')
 const {generateTokenWithId,verifyToken} =  require('./token-manager/token-manager')
 
 // Routes
-const {authRouter_webportal} = require('./routes/webportalRoutes');
-const {authRouter_desktopApp} = require('./routes/desktopappRoutes')
+const {webportal} = require('./routes/webportalRoutes');
+const {desktopApp} = require('./routes/desktopappRoutes')
 const app = express();
 
 app.use(bodyparser.json())
@@ -62,7 +62,6 @@ app.use(session({ secret: 'cats', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 app.use(
     '/api-docs',
     swaggerUi.serve, 
@@ -70,8 +69,9 @@ app.use(
 );
 
 // Maping routes.
-app.use("/auth-api",authRouter_webportal);
-app.use("/auth-api",authRouter_desktopApp);
+app.use("/auth-api",webportal);
+app.use("/auth-api",desktopApp);
+app.use("/host-api",desktopApp);
 
 // Google authentication
 app.get('/auth-api/googleAuthentication',

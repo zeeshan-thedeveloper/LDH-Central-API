@@ -41,7 +41,8 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth2": "^0.2.0",
     "pug": "^3.0.2",
-    "swagger-ui-express": "^4.4.0"
+    "swagger-ui-express": "^4.4.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/helper-compilation-targets": "^7.18.2",

@@ -6,7 +6,7 @@ const {
 } = require("../mongodb/schemas/admin-schemas/admin-users");
 const {
   developers_users_schema,
-} = require("../mongodb/schemas/consumer-schemas/schema-users");
+} = require("../mongodb/schemas/consumer-schemas/developer-users");
 const {
   encrypt,
   decrypt,
@@ -26,6 +26,7 @@ const {
   TOKEN_VERIFIED,
   COULD_NOT_FETCH,
   FETCHED,
+  ACCONT_CREATED,
 } = require("./responses/responses");
 const {
   generateTokenWithId,
@@ -127,7 +128,7 @@ const createAdminAccount = async (req, res) => {
             console.log("insertedData", insertedData);
             res.status(200).send({
               responseMessage: "Account created successfully",
-              responseCode: CREATED_ACCOUNT,
+              responseCode:ACCONT_CREATED,
               responsePayload: insertedData,
             });
           } else {
@@ -147,7 +148,7 @@ const createAdminAccount = async (req, res) => {
   } else if (authType == "userName&Password") {
   }
 };
-
+ 
 
 const getListOfAdminAccounts = (req, res) => {
 
@@ -166,6 +167,7 @@ const getListOfAdminAccounts = (req, res) => {
       // console.log(data)
       let results = data.map((record)=>{
         return {
+          id:record._id,
           firstName: record.firstName,
           lastName: record.lastName,
           email: record.email,  
@@ -200,6 +202,7 @@ const getListOfDeveloperAccounts = (req, res) => {
       // console.log(data)
       let results = data.map((record)=>{
         return {
+          id:record._id,
           firstName: record.firstName,
           lastName: record.lastName,
           email: record.email,  

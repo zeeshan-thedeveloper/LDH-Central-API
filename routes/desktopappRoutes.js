@@ -1,10 +1,16 @@
 const express=require('express')
 const authController=require('../controllers/authenticationControllers')
-const authRouter_desktopApp=express()
+const hostLayerController = require('../controllers/hostLayerControllers');
+const desktopApp=express()
 
-authRouter_desktopApp.get("/getListOfAdminAccounts",authController.getListOfAdminAccounts);
-authRouter_desktopApp.get("/getListOfDevelopersAccounts",authController.getListOfDeveloperAccounts);
+desktopApp.get("/getListOfAdminAccounts",authController.getListOfAdminAccounts);
+desktopApp.get("/getListOfDevelopersAccounts",authController.getListOfDeveloperAccounts);
+desktopApp.post("/addHostInRequestList",hostLayerController.addHostInRequestList);
+desktopApp.post("/connectHostToAdmin",hostLayerController.connectHostToAdmin);
+desktopApp.post("/isHostConnected",hostLayerController.isHostConnected);
+
+
 
 module.exports = {
-    authRouter_desktopApp
+    desktopApp
 };
