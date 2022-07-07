@@ -5,8 +5,5 @@ module.exports={
 
     // Admin-accounts and
     ADD_ITEM_admin_account_cache:"ADD_ITEM_admin_account_cache",
-    // GET_ITEM_admin_account_cache:"GET_ITEM_admin_account_cache",
-    REMOVE_ITEM_admin_account_cache:"REMOVE_ITEM_admin_account_cache",
-    UPDATE_ITEM_admin_account_cache:"UPDATE_ITEM_admin_account_cache",
-    
+    ADD_ITEM_hosts_info_list_cache:"ADD_ITEM_hosts_info_list_cache",
 }

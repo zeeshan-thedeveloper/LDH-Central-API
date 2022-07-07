@@ -8,6 +8,9 @@ desktopApp.get("/getListOfDevelopersAccounts",authController.getListOfDeveloperA
 desktopApp.post("/addHostInRequestList",hostLayerController.addHostInRequestList);
 desktopApp.post("/connectHostToAdmin",hostLayerController.connectHostToAdmin);
 desktopApp.post("/isHostConnected",hostLayerController.isHostConnected);
+desktopApp.get("/getUniqueId",hostLayerController.getUniqueId);
+desktopApp.post("/updateDeviceIdInCache",hostLayerController.updateDeviceIdInCache);
+desktopApp.get("/getInfo",hostLayerController.getInfo);
 
 
 
