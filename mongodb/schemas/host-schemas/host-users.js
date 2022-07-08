@@ -4,13 +4,18 @@ const host_user = new mongoose.Schema({
     //     type: String,
     //     required: true,
     // },
+    hostName:{
+        type: String,
+        required: true,
+    },
     hostId: {
         type: String,
         required: true,
     },
     connectedAdmin:{
-        type:String,
+        type:mongoose.Schema.Types.ObjectId,
         required: true,
+        ref:"admin_users_schema"
     },
    
     isConnected: {

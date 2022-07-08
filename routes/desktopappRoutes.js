@@ -10,10 +10,8 @@ desktopApp.post("/connectHostToAdmin",hostLayerController.connectHostToAdmin);
 desktopApp.post("/isHostConnected",hostLayerController.isHostConnected);
 desktopApp.get("/getUniqueId",hostLayerController.getUniqueId);
 desktopApp.post("/updateDeviceIdInCache",hostLayerController.updateDeviceIdInCache);
+desktopApp.post("/getListOfPendingHostsByAdminId",hostLayerController.getListOfPendingHostsByAdminId);
 desktopApp.get("/getInfo",hostLayerController.getInfo);
-
-
-
 module.exports = {
     desktopApp
 };
