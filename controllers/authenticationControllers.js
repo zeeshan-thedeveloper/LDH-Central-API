@@ -33,7 +33,7 @@ const {
   verifyToken,
 } = require("../token-manager/token-manager");
 
-const expires_in = "120s";
+const expires_in = "600s";
 
 // ----------------------------- GOOGLE Auth -------------------
 

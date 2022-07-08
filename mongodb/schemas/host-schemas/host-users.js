@@ -19,8 +19,8 @@ const host_user = new mongoose.Schema({
     },
    
     isConnected: {
-        type:Boolean,
-        default:false,
+        type:String,
+        required: true,
     } 
 });
 

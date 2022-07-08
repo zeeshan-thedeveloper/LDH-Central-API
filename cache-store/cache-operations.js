@@ -30,7 +30,7 @@ const get_host_info_list_cache=(hostId,hostDeviceId) => {
         return user;
 }
 
-const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId) => {
+const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId,lastSeenDateAndTime) => {
     let  list = hosts_info_list_cache.get("hosts_info_list_cache") 
     let flag=false;
 
@@ -38,6 +38,7 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId) => {
         if (element.hostId==hostId){
             element.hostId = hostId;
             element.hostDeviceId = hostDeviceId;
+            element.lastSeenDateAndTime = lastSeenDateAndTime;
             flag=true;
             return element;
         }
@@ -46,6 +47,7 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId) => {
         hosts_info_list_cache.get("hosts_info_list_cache").push({
             hostId:hostId,
             hostDeviceId: hostDeviceId,
+            lastSeenDateAndTime:lastSeenDateAndTime
         });
     }
     else{
