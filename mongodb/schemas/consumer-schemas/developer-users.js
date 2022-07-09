@@ -25,6 +25,10 @@ const developer_user = new mongoose.Schema({
         type: String,
         required: true,
     },
+    allowedHostAccessUrls:{
+        type:Array,
+        default:[]
+    },
     googleAccountData:{
         type:Object,
         required: false,

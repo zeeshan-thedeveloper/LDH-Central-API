@@ -43,6 +43,7 @@ const {generateTokenWithId,verifyToken} =  require('./token-manager/token-manage
 // Routes
 const {webportal} = require('./routes/webportalRoutes');
 const {desktopApp} = require('./routes/desktopappRoutes')
+const {consumer} = require('./routes/consumerRoutes')
 const app = express();
 
 app.use(bodyparser.json())
@@ -73,6 +74,7 @@ app.use("/auth-api",webportal);
 app.use("/host-accessUrl-api",webportal);
 app.use("/auth-api",desktopApp);
 app.use("/host-api",desktopApp);
+app.use("/consumer-api",consumer);
 
 // Google authentication
 app.get('/auth-api/googleAuthentication',
