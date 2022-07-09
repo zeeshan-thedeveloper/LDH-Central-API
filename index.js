@@ -70,6 +70,7 @@ app.use(
 
 // Maping routes.
 app.use("/auth-api",webportal);
+app.use("/host-accessUrl-api",webportal);
 app.use("/auth-api",desktopApp);
 app.use("/host-api",desktopApp);
 

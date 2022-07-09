@@ -1,4 +1,20 @@
 const mongoose = require("mongoose");
+
+const hostAccessUrlSchema=new mongoose.Schema({
+    url:{
+        type:String,
+        required:true
+    },
+    numberOfHits:{
+        type:Number,
+        required:false
+    },
+    status:{
+        type:Boolean,
+        default:false
+    }
+})
+
 const host_user = new mongoose.Schema({
     // hostDeviceId: {
     //     type: String,
@@ -17,7 +33,7 @@ const host_user = new mongoose.Schema({
         required: true,
         ref:"admin_users_schema"
     },
-   
+    hostAcessUrl:hostAccessUrlSchema,
     isConnected: {
         type:String,
         required: true,
