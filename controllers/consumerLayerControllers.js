@@ -38,7 +38,7 @@ const getListOfServiceProviders = (req, res) => {
 };
 
 const makeConnectionRequestToAdmin = (req, res) => {
-  const { adminId, developerId, listOfDatabases } = req.body;
+  const { adminId, developerId,developerName,developerEmail, listOfDatabases } = req.body;
   let date_ob = new Date();
   let date = ("0" + date_ob.getDate()).slice(-2);
   let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
@@ -58,6 +58,8 @@ const makeConnectionRequestToAdmin = (req, res) => {
     minutes +
     ":" +
     seconds;
+
+  console.log("Rec values ",adminId+" - "+developerId+" - "+listOfDatabases);  
   dev_admin_con_schema.create(
     {
       developerId: developerId,
@@ -65,6 +67,8 @@ const makeConnectionRequestToAdmin = (req, res) => {
       requestTimeAndData: timeAndData,
       listOfDatabases: listOfDatabases,
       requestStatus: "Un-resolved", 
+      developerName:developerName,
+      developerEmail:developerEmail,
     },
     (err, data) => {
       if (data) {

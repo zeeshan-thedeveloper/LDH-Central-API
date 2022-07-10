@@ -4,6 +4,14 @@ const devAndAdminConSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    developerName:{
+        type:String,
+        required:false,
+    },
+    developerEmail:{
+        type:String,
+        required:false
+    },
     adminId:{
         type:String,
         required:true

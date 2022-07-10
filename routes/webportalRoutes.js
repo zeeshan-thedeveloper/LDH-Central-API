@@ -1,6 +1,7 @@
 const express=require('express')
 const authController=require('../controllers/authenticationControllers')
 const hostAccessUrlController=require('../controllers/hostAccessEndPointsControllers')
+const adminPortalControllers = require('../controllers/adminPortalControllers')
 const webportal=express()
 
 // Auth router
@@ -14,6 +15,9 @@ webportal.post("/ ",authController.verifyJWTToken);
 webportal.post("/getJwtToken",authController.getJWTToken);
 webportal.get("/test",authController.test);
 webportal.post("/setStatusOfHostAccessUrl",hostAccessUrlController.setStatusOfHostAccessUrl);
+webportal.post("/getListOfDevelopersRequestsByAdminId",adminPortalControllers.getListOfDevelopersRequestsByAdminId);
+webportal.post("/updateStatusOfDevConReq",adminPortalControllers.updateStatusOfDevConReq);
+webportal.post("/getListOfDevelopersAccountsByAdminId",adminPortalControllers.getListOfDevelopersAccountsByAdminId);
 
 module.exports = {
     webportal
