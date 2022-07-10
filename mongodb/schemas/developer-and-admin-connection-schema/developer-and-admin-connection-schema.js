@@ -24,6 +24,11 @@ const devAndAdminConSchema = new mongoose.Schema({
         type:Array,
         default:[]
     },
+    accessRole:{
+        type:String,
+        required:false,
+        default:null
+    },
     requestStatus:{
         type:String,
         required:true

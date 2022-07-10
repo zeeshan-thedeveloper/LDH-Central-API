@@ -46,11 +46,14 @@ const getListOfDevelopersAccountsByAdminId=(req,res)=>{
 
 
 const updateStatusOfDevConReq= async (req,res)=>{
-    const {requestId,requestStatus}=req.body;
+    const {requestId,requestStatus,accessRole}=req.body;
     
     const record = await dev_admin_con_schema.findOneAndUpdate(
         {_id:requestId },
-        { requestStatus: requestStatus },
+        { 
+            requestStatus: requestStatus,
+            accessRole:accessRole
+        },
         { new: true }
       );
       if (record) {
