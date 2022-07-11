@@ -46,13 +46,14 @@ const getListOfDevelopersAccountsByAdminId=(req,res)=>{
 
 
 const updateStatusOfDevConReq= async (req,res)=>{
-    const {requestId,requestStatus,accessRole}=req.body;
-    
+    const {requestId,requestStatus,accessRole,isAutoAccessUrlTokenGenerationAllowed}=req.body;
+    console.log("isAutoAccessUrlTokenGenerationAllowed",isAutoAccessUrlTokenGenerationAllowed)
     const record = await dev_admin_con_schema.findOneAndUpdate(
         {_id:requestId },
         { 
             requestStatus: requestStatus,
-            accessRole:accessRole
+            accessRole:accessRole,
+            isAutoAccessUrlTokenGenerationAllowed:isAutoAccessUrlTokenGenerationAllowed
         },
         { new: true }
       );

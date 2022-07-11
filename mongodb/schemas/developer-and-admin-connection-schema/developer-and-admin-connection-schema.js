@@ -29,6 +29,11 @@ const devAndAdminConSchema = new mongoose.Schema({
         required:false,
         default:null
     },
+    isAutoAccessUrlTokenGenerationAllowed:{
+        type:Boolean,
+        required:false,
+        default:false
+    },
     requestStatus:{
         type:String,
         required:true
