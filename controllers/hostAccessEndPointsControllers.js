@@ -1,5 +1,6 @@
 const { host_users_schema } = require("../mongodb/schemas/host-schemas/host-users");
-const { DATA_UPDATED, DATA_NOT_UPDATED } = require("./responses/responses");
+const { generateTokenWithId } = require("../token-manager/token-manager");
+const { DATA_UPDATED, DATA_NOT_UPDATED, FETCHED } = require("./responses/responses");
 
 const setStatusOfHostAccessUrl=async (req, res)=>{
     const {hostId,status}=req.body;
@@ -26,6 +27,18 @@ const setStatusOfHostAccessUrl=async (req, res)=>{
 
 }
 
+
+const getHostAccessUrlToken=(req, res)=>{
+  const {validationTime,id}=req.body;
+  const token = generateTokenWithId({ token: id },validationTime);
+  res.send({
+    responseMessage:"Token Generated",
+    responseCode:FETCHED,
+    responsePayload:token
+  })
+}
+
 module.exports ={
-    setStatusOfHostAccessUrl
+    setStatusOfHostAccessUrl,
+    getHostAccessUrlToken
 }

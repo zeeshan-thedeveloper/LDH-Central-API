@@ -48,10 +48,7 @@ const addHostInRequestList = (req, res) => {
             { _id: adminId },
             {  
               $push: {
-                connectedHostList: {
-                  hostId, hostName
-                }, //inserted data is the object to be inserted
-                
+                connectedHostList:dataToInsert, //inserted data is the object to be inserted
               }
             }, 
             { new: true }
@@ -95,12 +92,12 @@ const getListOfPendingHostsByAdminId= (req, res) => {
   // host_users_schema.find({connectedAdmin:_id,isConnected:  "Pending"}).populate("connectedAdmin").then((data)=>{
 
   host_users_schema.find({$and:[{connectedAdmin:_id},{$or:[{isConnected:"Pending"},{isConnected:"Reject"},{isConnected:"Dis-connect"}]}]}).populate("connectedAdmin").then((data)=>{
-    // console.log("populated data : ",data)
+    console.log("populated data : ",data)
     // Now get the last seen from local cache and then send response back.
     let result = [];
     let  list = hosts_info_list_cache.get("hosts_info_list_cache") 
 
-    data.forEach((item)=>{
+    data.forEach((item)=>{ 
         let record={
           hostName:item.hostName,
           hostId:item.hostId,
@@ -181,11 +178,7 @@ const getListOfConnectedHostsByAdminId= (req, res) => {
 
 const updateHostConnectionStatus = async (req, res) => {
   const {hostId,adminId,status}=req.body;
-  if(status=="Connect"){
-    
-  }else if(status=="Dis-connect" || status=="Reject"){
-
-  }
+ 
   const record = await host_users_schema.findOneAndUpdate(
     {hostId:hostId,connectedAdmin: adminId},
     {  

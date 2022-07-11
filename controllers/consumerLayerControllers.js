@@ -1,6 +1,7 @@
 const {
   admin_users_schema,
 } = require("../mongodb/schemas/admin-schemas/admin-users");
+const { developers_users_schema } = require("../mongodb/schemas/consumer-schemas/developer-users");
 const {
   dev_admin_con_schema,
 } = require("../mongodb/schemas/developer-and-admin-connection-schema/developer-and-admin-connection-schema");
@@ -165,7 +166,29 @@ const makeConnectionRequestToAdmin = (req, res) => {
   );
 };
 
+
+const getListOfActiveHostsByDeveloperId=(req, res)=>{
+  const {developerId} = req.body;
+  developers_users_schema.find({_id:developerId},(err, data)=>{
+    if(data){
+      const listOfHosts = data[0].allowedHostAccessUrls
+      res.status(200).send({
+        responseMessage:"Successfully loaded the list of hosts..",
+        resoonseCode:FETCHED,
+        responsePayload:listOfHosts
+      })
+    }else{
+      res.status(200).send({
+        responseMessage:"Could not  successfully loaded the list of hosts..",
+        resoonseCode:COULD_NOT_FETCH,
+        responsePayload:err
+      })
+    }
+  })
+}
+
 module.exports = {
   getListOfServiceProviders,
   makeConnectionRequestToAdmin,
+  getListOfActiveHostsByDeveloperId
 };
