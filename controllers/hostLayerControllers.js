@@ -99,6 +99,7 @@ const getListOfPendingHostsByAdminId= (req, res) => {
     // Now get the last seen from local cache and then send response back.
     let result = [];
     let  list = hosts_info_list_cache.get("hosts_info_list_cache") 
+
     data.forEach((item)=>{
         let record={
           hostName:item.hostName,
@@ -118,6 +119,7 @@ const getListOfPendingHostsByAdminId= (req, res) => {
         }
         result.push(record);
     })
+
     res.status(200).send({
       responseMessage:"List of pending hosts",
       responseCode:FETCHED,
@@ -179,6 +181,11 @@ const getListOfConnectedHostsByAdminId= (req, res) => {
 
 const updateHostConnectionStatus = async (req, res) => {
   const {hostId,adminId,status}=req.body;
+  if(status=="Connect"){
+    
+  }else if(status=="Dis-connect" || status=="Reject"){
+
+  }
   const record = await host_users_schema.findOneAndUpdate(
     {hostId:hostId,connectedAdmin: adminId},
     {  

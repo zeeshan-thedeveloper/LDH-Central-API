@@ -1,4 +1,5 @@
 
+const { developers_users_schema } = require("../mongodb/schemas/consumer-schemas/developer-users");
 const { dev_admin_con_schema } = require("../mongodb/schemas/developer-and-admin-connection-schema/developer-and-admin-connection-schema");
 const { FETCHED, COULD_NOT_FETCH, DATA_UPDATED, DATA_NOT_UPDATED } = require("./responses/responses");
 
@@ -61,11 +62,48 @@ const updateStatusOfDevConReq= async (req,res)=>{
         // ------------------------------
             // We have to add this in the relative admin and developer for ease of fetching the records.
         // -----------------------------
-        res.status(200).send({
-            responseMessage:" Connection Status updated successfully",
-            responseCode:DATA_UPDATED,
-            responsePayload:record
-        })
+
+        if(requestStatus=="Accept"){
+            const updatedRecord = await developers_users_schema.findOneAndUpdate(
+                {_id:record.developerId},
+                { $push: { allowedHostAccessUrls: record  } }, 
+                { new: true }
+              );
+              if (updatedRecord) {
+            res.status(200).send({
+                responseMessage:" Connection Status updated successfully",
+                responseCode:DATA_UPDATED,
+                responsePayload:record
+            })}else{
+                res.status(200).send({
+                    responseMessage:" Connection Status could not updated successfully",
+                    responseCode: DATA_NOT_UPDATED,
+                    responsePayload:record
+                })
+            }
+        }else if(requestStatus=="Decline"){
+
+            const updatedRecord = await developers_users_schema.findOneAndUpdate(
+                {_id:record.developerId},
+                { $pull: { allowedHostAccessUrls: {_id:record._id}  } }, 
+                { new: true }
+              );
+              if (updatedRecord) {
+            res.status(200).send({
+                responseMessage:" Connection Status updated successfully",
+                responseCode:DATA_UPDATED,
+                responsePayload:record
+            })}else{
+                res.status(200).send({
+                    responseMessage:" Connection Status could not updated successfully",
+                    responseCode: DATA_NOT_UPDATED,
+                    responsePayload:record
+                })
+            }
+            
+        }
+        
+       
       }else{
         console.log("Status not updated")
         res.status(200).send({
