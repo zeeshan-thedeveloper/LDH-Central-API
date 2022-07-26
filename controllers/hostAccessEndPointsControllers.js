@@ -8,6 +8,7 @@ const setStatusOfHostAccessUrl=async (req, res)=>{
         { hostId: hostId},
         {  
             $set:{"hostAcessUrl.status":status}
+            // TODO : this must be used from admin side.
         }, 
         { new: true }
       );

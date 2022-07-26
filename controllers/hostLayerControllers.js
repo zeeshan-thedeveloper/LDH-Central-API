@@ -48,7 +48,7 @@ const addHostInRequestList = (req, res) => {
             { _id: adminId },
             {  
               $push: {
-                connectedHostList:dataToInsert, //inserted data is the object to be inserted
+                connectedHostList:dataToInsert._id, //inserted data is the object to be inserted
               }
             }, 
             { new: true }
@@ -182,11 +182,13 @@ const updateHostConnectionStatus = async (req, res) => {
   const record = await host_users_schema.findOneAndUpdate(
     {hostId:hostId,connectedAdmin: adminId},
     {  
-      isConnected:status
+      isConnected:status,
+      $set:{"hostAcessUrl.status":(status=="Connect") ? true : false}  
+      //TODO: this could have been in control of admin. 
     }, 
     { new: true }
   );
-  if (record) {
+  if (record) { 
     // record updated
     res.status(200).send({
       responseMessage:"Host status updated",
