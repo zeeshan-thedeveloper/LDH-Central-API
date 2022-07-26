@@ -5,6 +5,7 @@ const { developers_users_schema } = require("../mongodb/schemas/consumer-schemas
 const {
   dev_admin_con_schema,
 } = require("../mongodb/schemas/developer-and-admin-connection-schema/developer-and-admin-connection-schema");
+const { host_users_schema } = require("../mongodb/schemas/host-schemas/host-users");
 const {
   FETCHED,
   COULD_NOT_FETCH,
@@ -15,7 +16,7 @@ const {
 const getListOfServiceProviders = (req, res) => {
   const { developerId } = req.body;
 
-  admin_users_schema.find({}, (err, data) => {
+  admin_users_schema.find({},async (err, data) => {
     if (err) {
       res.status(200).send({
         responseCode: COULD_NOT_FETCH,
@@ -23,19 +24,54 @@ const getListOfServiceProviders = (req, res) => {
         payload: err,
       });
     } else {
-      // console.log(data)
+      
+      // Promises
 
-      let results = data.map((record) => {
-        // check for status of connected hosts...record
-        return {
-          serviceProviderId: record._id,
-          firstName: record.firstName,
-          lastName: record.lastName,
-          email: record.email,
-          profilePhotoUrl: record.profilePhotoUrl,
-          connectedHostList: record.connectedHostList,
-        };
-      });
+      const individualHostData=(host)=>{
+        return new Promise(async (resolve, reject) => {
+          const completeHost =await host_users_schema.findOne({hostId:host.hostId})
+          console.log("Complete host",completeHost)
+            resolve(completeHost)
+         })
+      }
+
+      const fetchHostCompleteData = (serviceProvider) => {
+        return new Promise(async (resolve, reject) => {
+          var promises = serviceProvider.connectedHostList.map(individualHostData);
+          var results = await Promise.all(promises)
+        
+          let record = {
+              serviceProviderId: serviceProvider._id,
+              firstName: serviceProvider.firstName,
+              lastName: serviceProvider.lastName,
+              email: serviceProvider.email,
+              profilePhotoUrl: serviceProvider.profilePhotoUrl,
+              connectedHostList:results,
+            }
+
+          resolve(record);
+        })
+      }
+
+      const populateTheHostInfo=(dataFetched)=>{
+        return new Promise(async (resolve, reject)=>{
+          var promises =dataFetched.map(fetchHostCompleteData);
+          var results =await Promise.all(promises);
+          resolve(results);
+          // console.log(results[0])
+            // resolve(data);
+            // return {
+            //   serviceProviderId: record._id,
+            //   firstName: record.firstName,
+            //   lastName: record.lastName,
+            //   email: record.email,
+            //   profilePhotoUrl: record.profilePhotoUrl,
+            //   connectedHostList: results[0],
+            // };
+          });
+    
+        }
+      
 
       const checkForServiceProviderStatus = (listOfServiceProviders) => {
         return new Promise((resolve, reject) => {
@@ -85,8 +121,12 @@ const getListOfServiceProviders = (req, res) => {
         });
       };
 
+
+
+      populateTheHostInfo(data).then((results) => {
+       
       checkForServiceProviderStatus(results).then(
-        (success) => {
+        (success) => { 
           res.status(200).send({
             responseMessage: " Data fetched successfully ",
             responseCode: FETCHED,
@@ -101,7 +141,13 @@ const getListOfServiceProviders = (req, res) => {
           });
         }
       );
+
+
+    })
+
     }
+
+    
   });
 };
 

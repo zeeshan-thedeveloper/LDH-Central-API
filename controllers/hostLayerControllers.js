@@ -5,6 +5,7 @@
 // isHostConnected
 // Note : communication will be done by using socket.io
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
+var mongoose = require('mongoose');
 const { hosts_info_list_cache } = require("../cache-store/cache");
 const { addOrUpdate_host_info_list_cache } = require("../cache-store/cache-operations");
 const {
@@ -48,10 +49,10 @@ const addHostInRequestList = (req, res) => {
             { _id: adminId },
             {  
               $push: {
-                connectedHostList:dataToInsert._id, //inserted data is the object to be inserted
+                connectedHostList:{hostId:hostId}, //inserted data is the object to be inserted
               }
             }, 
-            { new: true }
+            { new: true } 
           );
           if (record) {
             // updated the admin
@@ -126,7 +127,7 @@ const getListOfPendingHostsByAdminId= (req, res) => {
   }).catch((err)=>{
 
     res.status(501).send({
-      responseMessage:"Could not loadt the list of pending hosts",
+      responseMessage:"Could not load the list of pending hosts",
       responseCode:COULD_NOT_FETCH,
       payload:err
     })
@@ -183,7 +184,7 @@ const updateHostConnectionStatus = async (req, res) => {
     {hostId:hostId,connectedAdmin: adminId},
     {  
       isConnected:status,
-      $set:{"hostAcessUrl.status":(status=="Connect") ? true : false}  
+      // $set:{"hostAcessUrl.status":(status=="Connect") ? true : false}  
       //TODO: this could have been in control of admin. 
     }, 
     { new: true }

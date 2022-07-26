@@ -1,4 +1,13 @@
 const mongoose = require("mongoose");
+
+const connectedHostSchema= new mongoose.Schema({
+    hostId : {
+        type:String,
+        required: true,
+      
+    }
+})
+
 const admin_user = new mongoose.Schema({
     firstName: {
         type: String,
@@ -25,7 +34,7 @@ const admin_user = new mongoose.Schema({
         type: String,
         required: true,
     },
-    connectedHostList:{ type : Array , "default" : [] },
+    connectedHostList:[connectedHostSchema],
     googleAccountData:{
         type:Object,
         required: false,
