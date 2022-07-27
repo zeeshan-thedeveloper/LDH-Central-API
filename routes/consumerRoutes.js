@@ -7,6 +7,7 @@ consumer.post("/getListOfServiceProviders",consumerLayerControllers.getListOfSer
 consumer.post("/makeConnectionRequestToAdmin",consumerLayerControllers.makeConnectionRequestToAdmin);
 consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getListOfActiveHostsByDeveloperId);
 consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getListOfActiveHostsByDeveloperId);
+consumer.post("/generateTokenForDeveloper",consumerLayerControllers.generateTokenForDeveloper);
 consumer.post("/getHostAccessUrlToken",hostAccessUrlController.getHostAccessUrlToken);
 
 module.exports = {

@@ -10,6 +10,7 @@ const {
 const {
   host_users_schema,
 } = require("../mongodb/schemas/host-schemas/host-users");
+const { generateTokenWithId } = require("../token-manager/token-manager");
 const {
   FETCHED,
   COULD_NOT_FETCH,
@@ -64,7 +65,6 @@ const getListOfServiceProviders = (req, res) => {
           var promises = dataFetched.map(fetchHostCompleteData);
           var results = await Promise.all(promises);
           resolve(results);
-         
         });
       };
 
@@ -247,8 +247,78 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
   });
 };
 
+const generateTokenForDeveloper = (req, res) => {
+  const { developerEmail, hostId,expiresIn } = req.body;
+  console.log("Host id for generating token : ", hostId);
+
+  //authentication schemes
+  // 1- check if host is enabled for resource sharing.
+  // 2- check in developer profile if this requested database is allowed.
+  // 3-
+  host_users_schema.find({ hostId: hostId }, (err, hostData) => {
+    if (!err) {
+      if (hostData.length > 0) {
+        console.log("Data",hostData)
+        // data exists
+        if (hostData[0].hostAcessUrl.status == true) {
+
+          // checking if this is allowed for targeted developer
+          developers_users_schema.find({email:developerEmail}, (err, data) => {
+            if(!err){
+              if(data.length > 0){
+                // Now let's generate token
+                console.log(expiresIn)
+                const jwtToken = generateTokenWithId({ key: developerEmail },expiresIn);
+                res.status(501).send({
+                  responseMessage: 
+                    "Token generated successfully",
+                  responseCode: FETCHED,
+                  responsePayload: {jwtToken,host:hostData},
+                }); 
+              }else{  
+                // No such record
+                res.status(501).send({
+                  responseMessage:
+                    "No such data found for this email",
+                  responseCode: COULD_NOT_FETCH,
+                  responsePayload: null,
+                }); 
+              }
+            }else{
+              res.status(501).send({
+                responseMessage:
+                  "Server internal error while loading data",
+                responseCode: COULD_NOT_FETCH,
+                responsePayload: err,
+              }); 
+            }
+          })
+         
+        } else {
+          // status is not available
+          res.status(200).send({
+            responseMessage:
+              "could not generated the token because host is not sharing resource",
+            responseCode: COULD_NOT_FETCH,
+            responsePayload:null,
+          });
+        }
+      } else {
+        // status is not available
+        res.status(200).send({
+          responseMessage:
+            "could not find the host with provided host id",
+          responseCode: COULD_NOT_FETCH,
+          responsePayload: hostData,
+        });
+      }
+    }
+  });
+};
+
 module.exports = {
   getListOfServiceProviders,
   makeConnectionRequestToAdmin,
   getListOfActiveHostsByDeveloperId,
+  generateTokenForDeveloper,
 };
