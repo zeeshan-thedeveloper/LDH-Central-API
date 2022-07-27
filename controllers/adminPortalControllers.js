@@ -24,7 +24,7 @@ const getListOfDevelopersRequestsByAdminId=(req,res)=>{
 
             const fetchIndividualData=(request)=>{
                 return new Promise((resolve, reject) => {
-                    console.log("Request",request.listOfDatabases);
+                    
                     let promises = request.listOfDatabases.map(fetchData)
                     let results = Promise.all(promises)
                     results.then((data) => {
@@ -69,9 +69,7 @@ const getListOfDevelopersRequestsByAdminId=(req,res)=>{
 const getListOfDevelopersAccountsByAdminId=(req,res)=>{
     const {adminId}=req.body;
     dev_admin_con_schema.find({$and:[{adminId:adminId},{$or:[{requestStatus:"Accept"}]}]},(err, data)=>{
-        if(data){
-
-      
+        if(data){      
             const fetchData=(hostId)=>{
                 return new Promise((resolve, reject) => {
                     host_users_schema.find({hostId:hostId}, (err, data)=>{
@@ -84,7 +82,7 @@ const getListOfDevelopersAccountsByAdminId=(req,res)=>{
 
             const fetchIndividualData=(request)=>{
                 return new Promise((resolve, reject) => {
-                    console.log("Request",request.listOfDatabases);
+                  
                     let promises = request.listOfDatabases.map(fetchData)
                     let results = Promise.all(promises)
                     results.then((data) => {
@@ -111,7 +109,7 @@ const getListOfDevelopersAccountsByAdminId=(req,res)=>{
                 responsePayload:response
             });
             })
-            
+
         }else{
             res.status(200).send({
                 responseMessage:"List of connection requests could not fetched",
