@@ -19,11 +19,13 @@
   "homepage": "https://github.com/Local-Database-Hosting-Platefrom/Central-API#readme",
   "dependencies": {
     "amqplib": "^0.10.0",
+    "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
     "cookie-parser": "^1.4.6",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
+    "cross-fetch": "^3.1.5",
     "cryptr": "^6.0.3",
     "dotenv": "^16.0.1",
     "ejs": "^3.1.8",

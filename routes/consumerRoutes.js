@@ -9,6 +9,7 @@ consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getL
 consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getListOfActiveHostsByDeveloperId);
 consumer.post("/generateTokenForDeveloper",consumerLayerControllers.generateTokenForDeveloper);
 consumer.post("/getHostAccessUrlToken",hostAccessUrlController.getHostAccessUrlToken);
+consumer.post("/executeMysqlQuery",hostAccessUrlController.executeMysqlQuery);
 
 module.exports = {
     consumer

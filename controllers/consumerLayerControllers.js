@@ -254,7 +254,7 @@ const generateTokenForDeveloper = (req, res) => {
   //authentication schemes
   // 1- check if host is enabled for resource sharing.
   // 2- check in developer profile if this requested database is allowed.
-  // 3-
+  
   host_users_schema.find({ hostId: hostId }, (err, hostData) => {
     if (!err) {
       if (hostData.length > 0) {
