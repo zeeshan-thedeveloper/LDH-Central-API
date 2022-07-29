@@ -142,6 +142,16 @@ const getItem_available_and_connected_host_list_cache=(hostId)=>{
     return user;
 }
 
+const getItem_developers_host_access_url_request_list_cache=(requestId)=>{
+    let  list =developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache") 
+    let user=null;
+        list.forEach(element => {
+            if (element.requestId==requestId){
+                user = element;
+            }
+        });
+    return user;
+}
 
 module.exports={
     getItem_admin_accounts_cache,
@@ -149,5 +159,6 @@ module.exports={
     addOrUpdate_host_info_list_cache,
     addUpdate_developers_host_access_url_request_list_cache,
     addUpdate_available_and_connected_host_list_cache,
-    getItem_available_and_connected_host_list_cache
+    getItem_available_and_connected_host_list_cache,
+    getItem_developers_host_access_url_request_list_cache
 }

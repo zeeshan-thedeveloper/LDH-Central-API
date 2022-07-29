@@ -1,7 +1,7 @@
 const { get_host_info_list_cache } = require("../cache-store/cache-operations");
 const emiter = require("../events-engine/Emiters");
 const { host_users_schema } = require("../mongodb/schemas/host-schemas/host-users");
-const { checkIfHostIsConnectedAndOnline, sendMySQLQueryToHost } = require("../queryProcessingAndFormatingEngine/queryProcessingEngine");
+const { checkIfHostIsConnectedAndOnline, sendMySQLQueryToHost, checkForMYSQLRequestStatus } = require("../queryProcessingAndFormatingEngine/queryProcessingEngine");
 const { generateTokenWithId } = require("../token-manager/token-manager");
 const { DATA_UPDATED, DATA_NOT_UPDATED, FETCHED } = require("./responses/responses");
 const events = require('../events-engine/Events');
@@ -50,7 +50,7 @@ const executeMysqlQuery=async (req, res)=>{
       // let hostDeviceId = await get_host_info_list_cache(hostId);
       //check if host is currently available on line or not?
       //if not available then make notification request.
-      checkIfHostIsConnectedAndOnline(hostId).then((response)=>{
+      checkIfHostIsConnectedAndOnline(hostId).then(async (response)=>{
         if(response){
           // available online
           if(response){
@@ -58,16 +58,15 @@ const executeMysqlQuery=async (req, res)=>{
             //so now lets send the query to the host.
             const requestId = sendMySQLQueryToHost(query,databaseName,hostId);
             console.log("Notified and sent the request with request id ",requestId);
-            
             // Now look for request .. if that is resolved or not.
-
+            const response = await checkForMYSQLRequestStatus(requestId);
+            console.log(response)
             resolve(response);//we need to send query response.
           }else{
             // host could be found in any cache. .. need to restart the host application in this case.
             reject(null);
           }
         }
-        
       },(err)=>{
         reject(null);
       })

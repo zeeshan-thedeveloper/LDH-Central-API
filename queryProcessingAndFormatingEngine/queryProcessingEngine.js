@@ -1,4 +1,4 @@
-const { get_host_info_list_cache, getItem_available_and_connected_host_list_cache, addUpdate_developers_host_access_url_request_list_cache } = require("../cache-store/cache-operations");
+const { get_host_info_list_cache, getItem_available_and_connected_host_list_cache, addUpdate_developers_host_access_url_request_list_cache, getItem_developers_host_access_url_request_list_cache } = require("../cache-store/cache-operations");
 const { notifyHostForNewJob } = require("../notification-manager/notification-manager");
 const { server}  = require("../index")
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
@@ -40,12 +40,41 @@ const sendMySQLQueryToHost=(query,databaseName,hostId)=>{
     emiter.emit(events.SEND_MYSQL_QUERY_TO_HOST,hostId,{
         query,databaseName,hostId,requestId
     });
-    
-    addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,null);
+
+    addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,null); //this cache stores the request sent to hosts.
     return requestId;
+}
+
+const checkForMYSQLRequestStatus=(requestId) => {
+    return new Promise((resolve, reject) => {
+
+        // What will happen in this function is that we will search the cache and as soon as we got
+        // the record with response then will terminate the timer and resolve the function
+
+        //TODO:Make request cache traversing efficient
+       
+        let timer=0;
+        let response=null;
+        const timerId = setInterval(() =>{
+            timer++;
+            if(timer==10){
+                //time up
+                clearInterval(timerId);
+                resolve(response)
+            }else{
+                const response = getItem_developers_host_access_url_request_list_cache(requestId);
+                if(response.response!=null){
+                    clearInterval(timerId);
+                    resolve(response);
+                }
+            }
+        },1000)
+
+    })
 }
 
 module.exports ={
     checkIfHostIsConnectedAndOnline,
-    sendMySQLQueryToHost
+    sendMySQLQueryToHost,
+    checkForMYSQLRequestStatus
 }
