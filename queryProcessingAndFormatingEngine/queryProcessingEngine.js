@@ -7,7 +7,7 @@ const emiter = require("../events-engine/Emiters");
 const events = require("../events-engine/Events")
 
 // This will contain method which we will be required to process a developer's request:
-const checkIfHostIsConnectedAndOnline=(hostId)=>{
+const checkIfHostIsConnectedAndOnline=(hostId,query,databaseName,requestId)=>{
     return new  Promise(function(resolve, reject){
         //lets check first if already connected or not.
         const availability = getItem_available_and_connected_host_list_cache(hostId);
@@ -17,7 +17,7 @@ const checkIfHostIsConnectedAndOnline=(hostId)=>{
             resolve(true);
         }else{
         console.log("Notifying the host")    
-        notifyHostForNewJob(hostId).then((data)=>{
+        notifyHostForNewJob(hostId,query,databaseName,requestId).then((data)=>{
             if(data!=null){
                 console.log("resolved notifying")
                 resolve(true)
@@ -34,9 +34,9 @@ const checkIfHostIsConnectedAndOnline=(hostId)=>{
     })
 }
 
-const sendMySQLQueryToHost=(query,databaseName,hostId)=>{
+const sendMySQLQueryToHost=(query,databaseName,hostId,requestId)=>{
     console.log("sendMySQLQueryToHost")
-    const requestId = uuidv1();
+    // const requestId = uuidv1();
     emiter.emit(events.SEND_MYSQL_QUERY_TO_HOST,hostId,{
         query,databaseName,hostId,requestId
     });

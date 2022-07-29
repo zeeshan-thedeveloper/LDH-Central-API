@@ -16,8 +16,10 @@ module.exports = {
     
     emiter.on(events.SEND_MYSQL_QUERY_TO_HOST, (hostId,payload) => {
       // Since on client side we have registred the listners with host ids
+      if(global.globalSocket!=null)
       global.globalSocket.emit(hostId,JSON.stringify(payload));
     });
+    
     emiter.on(events.INIT_CACHE, () => {
       requestsListCache.put("requestsListCache", []);
       admin_accounts_cache.put("admin_accounts_cache", []);

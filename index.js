@@ -54,7 +54,7 @@ const {generateTokenWithId,verifyToken} =  require('./token-manager/token-manage
 const {webportal} = require('./routes/webportalRoutes');
 const {desktopApp} = require('./routes/desktopappRoutes')
 const {consumer} = require('./routes/consumerRoutes');
-const { addUpdate_available_and_connected_host_list_cache } = require('./cache-store/cache-operations');
+const { addUpdate_available_and_connected_host_list_cache, addUpdate_developers_host_access_url_request_list_cache } = require('./cache-store/cache-operations');
 
 app.use(bodyparser.json())
 app.use(bodyparser.urlencoded({extended: false}));
@@ -121,24 +121,23 @@ app.get( '/github/callback',
 
 
 // host joining are.
+
 websocketListener.on('connection', (socket) => {
   // console.log('a user connected with id:',socket.id);
   // console.log(socket.io.engine.id);  
-  streamWriter=socket; 
-  socket.on('joining', function (hostId, hostDeviceId) {
+  global.globalSocket=socket;
+  socket.on('joining', function (hostId, hostDeviceId,payload) {
     console.log('MSG', hostId, ' saying ', hostDeviceId);
     addUpdate_available_and_connected_host_list_cache(hostId, hostDeviceId,"connected");
-    global.globalSocket=socket;
+    const {requestId,query,databaseName,response} = JSON.parse(payload);
+    addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
+    
   });
+  socket.on("resolvingMySQL",(payload) => {
+    const {requestId,query,databaseName,response} = JSON.parse(payload);
+    addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
+  })
 });
-
-// server.listen( /*process.env.PORT ||*/ 3003 , (error)=>{
-//     const port = process.env.PORT;
-//     if(!error) {
-//         emiter.emit(events.INIT_CACHE);
-//         console.log(`Listening`)
-//     } 
-// })
 
 module.exports = {
   generateTokenWithId,verifyToken,websocketListener,server

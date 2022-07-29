@@ -69,7 +69,9 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
      */
 
     list = list.map(element => {
+        console.log("Current request",element)
         if (element.requestId==requestId) {
+            console.log("Request found -----------------------------")
             element.requestId=requestId,
             element.hostId=hostId,
             element.query=query,
@@ -143,9 +145,10 @@ const getItem_available_and_connected_host_list_cache=(hostId)=>{
 }
 
 const getItem_developers_host_access_url_request_list_cache=(requestId)=>{
-    let  list =developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache") 
+    let  list = developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache") 
     let user=null;
-        list.forEach(element => {
+        list.forEach((element,index) => {
+            console.log("Element in getItem_developers_host_access_url_request_list_cache : "+index,element);
             if (element.requestId==requestId){
                 user = element;
             }

@@ -1,10 +1,11 @@
-const { get_host_info_list_cache } = require("../cache-store/cache-operations");
+const { get_host_info_list_cache, addUpdate_developers_host_access_url_request_list_cache } = require("../cache-store/cache-operations");
 const emiter = require("../events-engine/Emiters");
 const { host_users_schema } = require("../mongodb/schemas/host-schemas/host-users");
 const { checkIfHostIsConnectedAndOnline, sendMySQLQueryToHost, checkForMYSQLRequestStatus } = require("../queryProcessingAndFormatingEngine/queryProcessingEngine");
 const { generateTokenWithId } = require("../token-manager/token-manager");
 const { DATA_UPDATED, DATA_NOT_UPDATED, FETCHED } = require("./responses/responses");
 const events = require('../events-engine/Events');
+const { v1: uuidv1, v4: uuidv4 } = require("uuid");
 const setStatusOfHostAccessUrl=async (req, res)=>{
     const {hostId,status}=req.body;
     const record = await host_users_schema.findOneAndUpdate(
@@ -50,13 +51,16 @@ const executeMysqlQuery=async (req, res)=>{
       // let hostDeviceId = await get_host_info_list_cache(hostId);
       //check if host is currently available on line or not?
       //if not available then make notification request.
-      checkIfHostIsConnectedAndOnline(hostId).then(async (response)=>{
+      const requestId = uuidv1();
+
+      checkIfHostIsConnectedAndOnline(hostId,query,databaseName,requestId).then(async (response)=>{
         if(response){
           // available online
           if(response){
             // its available or notified.
             //so now lets send the query to the host.
-            const requestId = sendMySQLQueryToHost(query,databaseName,hostId);
+            sendMySQLQueryToHost(query,databaseName,hostId,requestId);
+            
             console.log("Notified and sent the request with request id ",requestId);
             // Now look for request .. if that is resolved or not.
             const response = await checkForMYSQLRequestStatus(requestId);
@@ -86,11 +90,19 @@ const executeMysqlQuery=async (req, res)=>{
       responsePayload:fail
     })
   })
- 
+}
+
+const resolveMYSQLQuery=(req, res) => {
+  const {hostId,requestId,query,response,databaseName} = req.body
+  console.log("rec request id : ",requestId)
+  console.log("rec response",response)
+  addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
+  res.status(200).send({responseMessage:"Resolved query successfully"})
 }
 
 module.exports ={
     setStatusOfHostAccessUrl,
     getHostAccessUrlToken,
-    executeMysqlQuery
+    executeMysqlQuery,
+    resolveMYSQLQuery
 }
