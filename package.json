@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -45,6 +45,7 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth2": "^0.2.0",
     "pug": "^3.0.2",
+    "socket.io": "^4.5.1",
     "store-js": "^2.0.4",
     "swagger-ui-express": "^4.4.0",
     "uuid": "^8.3.2"

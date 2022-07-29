@@ -9,6 +9,16 @@ const session = require('express-session');
 const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv');
+const app = express();
+
+const http = require('http');
+const server = http.createServer(app);
+
+const { Server } = require("socket.io");
+const websocketListener = new Server(server);
+let streamWriter;
+
+global.globalSocket=null;
 
 require('./authentication/google-authentication');
 
@@ -43,8 +53,8 @@ const {generateTokenWithId,verifyToken} =  require('./token-manager/token-manage
 // Routes
 const {webportal} = require('./routes/webportalRoutes');
 const {desktopApp} = require('./routes/desktopappRoutes')
-const {consumer} = require('./routes/consumerRoutes')
-const app = express();
+const {consumer} = require('./routes/consumerRoutes');
+const { addUpdate_available_and_connected_host_list_cache } = require('./cache-store/cache-operations');
 
 app.use(bodyparser.json())
 app.use(bodyparser.urlencoded({extended: false}));
@@ -109,14 +119,27 @@ app.get( '/github/callback',
     res.redirect('/auth-api/onGithubAuthSucess');
 });
 
-app.listen( /*process.env.PORT ||*/ 3003 , (error)=>{
-    const port = process.env.PORT;
-    if(!error) {
-        emiter.emit(events.INIT_CACHE);
-        console.log(`Listening`)
-    } 
-})
+
+// host joining are.
+websocketListener.on('connection', (socket) => {
+  // console.log('a user connected with id:',socket.id);
+  // console.log(socket.io.engine.id);  
+  streamWriter=socket; 
+  socket.on('joining', function (hostId, hostDeviceId) {
+    console.log('MSG', hostId, ' saying ', hostDeviceId);
+    addUpdate_available_and_connected_host_list_cache(hostId, hostDeviceId,"connected");
+    global.globalSocket=socket;
+  });
+});
+
+// server.listen( /*process.env.PORT ||*/ 3003 , (error)=>{
+//     const port = process.env.PORT;
+//     if(!error) {
+//         emiter.emit(events.INIT_CACHE);
+//         console.log(`Listening`)
+//     } 
+// })
 
 module.exports = {
-  generateTokenWithId,verifyToken
+  generateTokenWithId,verifyToken,websocketListener,server
 }

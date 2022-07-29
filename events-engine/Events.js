@@ -7,5 +7,5 @@ module.exports={
     ADD_ITEM_admin_account_cache:"ADD_ITEM_admin_account_cache",
     ADD_ITEM_hosts_info_list_cache:"ADD_ITEM_hosts_info_list_cache",
 
-    NOTIFY_HOST_FOR_NEW_JOB:"NOTIFY_HOST_FOR_NEW_JOB",
+    SEND_MYSQL_QUERY_TO_HOST:"SEND_MYSQL_QUERY_TO_HOST",
 }

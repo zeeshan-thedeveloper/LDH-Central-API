@@ -1,4 +1,4 @@
-const {requestsListCache,admin_accounts_cache,hosts_info_list_cache, developers_host_access_url_list_cache} = require('./cache')
+const {requestsListCache,admin_accounts_cache,hosts_info_list_cache, developers_host_access_url_request_list_cache, available_and_connected_host_list_cache} = require('./cache')
 
 const getItem_admin_accounts_cache=(id)=>{
     let  list =admin_accounts_cache.get("admin_accounts_cache") 
@@ -23,6 +23,8 @@ const get_host_info_list_cache=(hostId) => {
                     return null
                 }
             });
+
+            reject(null);
     })
 }
 
@@ -52,47 +54,46 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId,lastSeenDateAndTime)
     return list;
 }
 
-const addUpdate_developers_host_access_url_list_cache=(hostId,hostDeviceId,requestId) => {
-    let  list = developers_host_access_url_list_cache.get("developers_host_access_url_list_cache") 
+const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,query,database,response) => {
+    let  list = developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache") 
     let flag=false;
     /*
     {
         requestId:"",
         hostId:"",
         query:"",
-        hostUrl:"",
+       
         database:"",
         response:"",
     }
      */
+
     list = list.map(element => {
         if (element.requestId==requestId) {
             element.requestId=requestId,
             element.hostId=hostId,
             element.query=query,
-            element.hostUrl=hostUrl,
             element.database=database,
             element.response=response,
-            element.hostDeviceId=hostDeviceId,
-           
             flag=true;
+            console.log("Request updated  : ",requestId)
             return element;
         }
     });
     if(!flag){
-        developers_host_access_url_list_cache.get("developers_host_access_url_list_cache").push({
+        developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache").push({
            requestId:requestId,
            hostId:hostId,
            query:query,
-           hostUrl:hostUrl,
            database:database,
            response:response,
-           hostDeviceId:hostDeviceId
         });
+        console.log("Request new added  : ",requestId)
     }
     else{
-        developers_host_access_url_list_cache.put("developers_host_access_url_list_cache",list);
+        developers_host_access_url_request_list_cache.put("developers_host_access_url_request_list_cache",list);
     }
+
     return list;
 }
 
@@ -125,6 +126,7 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
     else{
         available_and_connected_host_list_cache.put("available_and_connected_host_list_cache",list);
     }
+    console.log("updated cache available_and_connected_host_list_cache ")
     return list;
 }
 
@@ -133,11 +135,11 @@ const getItem_available_and_connected_host_list_cache=(hostId)=>{
     let user=null;
         list.forEach(element => {
             if (element.hostId==hostId){
-               
                 user = element;
             }
         });
-        return user;
+
+    return user;
 }
 
 
@@ -145,7 +147,7 @@ module.exports={
     getItem_admin_accounts_cache,
     get_host_info_list_cache,
     addOrUpdate_host_info_list_cache,
-    addUpdate_developers_host_access_url_list_cache,
+    addUpdate_developers_host_access_url_request_list_cache,
     addUpdate_available_and_connected_host_list_cache,
     getItem_available_and_connected_host_list_cache
 }
