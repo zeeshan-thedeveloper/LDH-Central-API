@@ -40,7 +40,6 @@ const sendMySQLQueryToHost=(query,databaseName,hostId,requestId)=>{
     emiter.emit(events.SEND_MYSQL_QUERY_TO_HOST,hostId,{
         query,databaseName,hostId,requestId
     });
-
     addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,null); //this cache stores the request sent to hosts.
     return requestId;
 }

@@ -20,6 +20,13 @@ module.exports = {
       global.globalSocket.emit(hostId,JSON.stringify(payload));
     });
     
+    emiter.on(events.PING_THE_HOST, (hostId) => {
+      // Since on client side we have registred the listners with host ids
+      if(global.globalSocket!=null)
+      global.globalSocket.emit(hostId+"_pingChannel");
+    });
+    
+
     emiter.on(events.INIT_CACHE, () => {
       requestsListCache.put("requestsListCache", []);
       admin_accounts_cache.put("admin_accounts_cache", []);

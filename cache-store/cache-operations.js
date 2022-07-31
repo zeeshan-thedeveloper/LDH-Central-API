@@ -15,7 +15,10 @@ const getItem_admin_accounts_cache=(id)=>{
 const get_host_info_list_cache=(hostId) => {
     return new Promise((resolve, reject) => {
         let  list =hosts_info_list_cache.get("hosts_info_list_cache") 
-        list.forEach(element => {
+        console.log("looking into cache",list)
+        if(list!=null) {
+            
+            list.forEach(element => {
                 console.log(hostId)
                 if (element.hostId===hostId){
                     // console.log("Present host ",element)
@@ -24,7 +27,10 @@ const get_host_info_list_cache=(hostId) => {
                 }
             });
 
-            reject(null);
+            reject(null);    
+        }
+        reject(null);
+        
     })
 }
 
@@ -54,6 +60,7 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId,lastSeenDateAndTime)
     else{
         hosts_info_list_cache.put("hosts_info_list_cache",list);
     }
+    console.log("hosts_info_list_cache",hosts_info_list_cache.get("hosts_info_list_cache") )
     return list;
 }
 
@@ -122,6 +129,7 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
             element.hostDeviceId= hostDeviceId,
             element.connectionStatus=connectionStatus
             flag=true;
+            console.log("host status updated",hostId)
             return element;
         }
     });
@@ -131,6 +139,7 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
            hostDeviceId: hostDeviceId,
            connectionStatus:connectionStatus
         });
+        console.log("new host is available and connected")
     }
     else{
         available_and_connected_host_list_cache.put("available_and_connected_host_list_cache",list);

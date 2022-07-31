@@ -61,7 +61,6 @@ const executeMysqlQuery=async (req, res)=>{
             // its available or notified.
             //so now lets send the query to the host.
             sendMySQLQueryToHost(query,databaseName,hostId,requestId);
-            
             console.log("Notified and sent the request with request id ",requestId);
             // Now look for request .. if that is resolved or not.
             const response = await checkForMYSQLRequestStatus(requestId);
