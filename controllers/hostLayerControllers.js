@@ -125,7 +125,7 @@ const getListOfPendingHostsByAdminId= (req, res) => {
     })
 
   }).catch((err)=>{
-
+    console.log("error while loading the list of pending hosts : ",err);
     res.status(501).send({
       responseMessage:"Could not load the list of pending hosts",
       responseCode:COULD_NOT_FETCH,
