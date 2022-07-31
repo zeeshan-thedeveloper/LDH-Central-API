@@ -125,7 +125,7 @@ const getListOfPendingHostsByAdminId= (req, res) => {
     })
 
   }).catch((err)=>{
-    console.log("error while loading the list of pending hosts : ",err);
+
     res.status(501).send({
       responseMessage:"Could not load the list of pending hosts",
       responseCode:COULD_NOT_FETCH,
@@ -162,6 +162,7 @@ const getListOfConnectedHostsByAdminId= (req, res) => {
         }
         result.push(record);
     })
+    console.log("Send list of pending hosts",res)
     res.status(200).send({
       responseMessage:"List of connected hosts",
       responseCode:FETCHED,
@@ -169,6 +170,8 @@ const getListOfConnectedHostsByAdminId= (req, res) => {
     })
 
   }).catch((err)=>{
+    console.log("error while loading list of hosts",err)
+    //TODO:Problem : error when loading the list of pending hosts while fetching from 
     res.status(501).send({
       responseMessage:"Could not loadt the list of connected hosts",
       responseCode:COULD_NOT_FETCH,

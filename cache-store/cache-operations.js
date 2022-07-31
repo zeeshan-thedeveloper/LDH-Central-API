@@ -33,12 +33,15 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId,lastSeenDateAndTime)
     let flag=false;
 
     list = list.map(element => {
-        if (element.hostId==hostId){
-            element.hostId = hostId;
-            element.hostDeviceId = hostDeviceId;
-            element.lastSeenDateAndTime = lastSeenDateAndTime;
-            flag=true;
-            return element;
+        if(element!=undefined) {
+            if (element.hostId==hostId){
+                element.hostId = hostId;
+                element.hostDeviceId = hostDeviceId;
+                element.lastSeenDateAndTime = lastSeenDateAndTime;
+                flag=true;
+                
+                return element;
+            }
         }
     });
     if(!flag){
@@ -70,17 +73,21 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
 
     list = list.map(element => {
         console.log("Current request",element)
-        if (element.requestId==requestId) {
-            console.log("Request found -----------------------------")
-            element.requestId=requestId,
-            element.hostId=hostId,
-            element.query=query,
-            element.database=database,
-            element.response=response,
-            flag=true;
-            console.log("Request updated  : ",requestId)
-            return element;
+        if(element!=undefined){
+            if (element.requestId==requestId) {
+                console.log("Request found -----------------------------")
+                element.requestId=requestId,
+                element.hostId=hostId,
+                element.query=query,
+                element.database=database,
+                element.response=response,
+                flag=true;
+                console.log("Request updated  : ",requestId)
+                return element;
+            }
         }
+
+        
     });
     if(!flag){
         developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache").push({
@@ -149,9 +156,11 @@ const getItem_developers_host_access_url_request_list_cache=(requestId)=>{
     let user=null;
         list.forEach((element,index) => {
             console.log("Element in getItem_developers_host_access_url_request_list_cache : "+index,element);
+            if(element!=undefined){
             if (element.requestId==requestId){
                 user = element;
             }
+        }
         });
     return user;
 }

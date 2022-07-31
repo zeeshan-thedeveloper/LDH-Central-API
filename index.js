@@ -133,10 +133,13 @@ websocketListener.on('connection', (socket) => {
     addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
     
   });
+
   socket.on("resolvingMySQL",(payload) => {
-    const {requestId,query,databaseName,response} = JSON.parse(payload);
+    const {requestId,hostId,query,databaseName,response} = JSON.parse(payload);
+    console.log("Data recieved from host is : ",JSON.parse(payload));
     addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
   })
+
 });
 
 module.exports = {

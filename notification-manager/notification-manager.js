@@ -7,10 +7,11 @@ const notifyHostForNewJob=(hostId,query,databaseName,requestId)=>{
     return new Promise((resolve, reject) => {
         console.log("notifyHostForNewJob")
         get_host_info_list_cache(hostId).then(async (host)=>{
-          
+          console.log("Host to who going to notify",host)
           if(host!=null){
-
+           
           addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,null); 
+
           const response = await fetch("https://api.electrolytic.app/push/send", {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, *cors, same-origin

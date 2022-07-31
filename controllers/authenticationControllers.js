@@ -32,6 +32,7 @@ const {
   generateTokenWithId,
   verifyToken,
 } = require("../token-manager/token-manager");
+const { FRONT_END_BASE_URL } = require("../request-manager/urls");
 
 const expires_in = "600s";
 
@@ -45,7 +46,7 @@ const onGoogleAuthSucess = (req, res) => {
   emiter.emit(events.ADD_ITEM_admin_account_cache, req.user);
   const user_Id = encrypt(req.user.id);
   res.redirect(
-    `http://localhost:3000/Authentication/SignIn?id=${
+    `${FRONT_END_BASE_URL}/Authentication/SignIn?id=${
       user_Id != undefined ? user_Id : ""
     }&authType=google`
   );
@@ -73,7 +74,7 @@ const onGithubAuthSucess = (req, res) => {
   // res.send("Github authentication is successful");
   const user_Id = encrypt(req.user.nodeId);
   res.redirect(
-    `http://localhost:3000/Authentication/SignIn?user_Id=${
+    `${FRONT_END_BASE_URL}/Authentication/SignIn?user_Id=${
       user_Id != undefined ? user_Id : ""
     }&authType=github`
   );

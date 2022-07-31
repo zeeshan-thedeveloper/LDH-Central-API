@@ -47,6 +47,7 @@ const executeMysqlQuery=async (req, res)=>{
     return new Promise(async (resolve, reject) => {
       // this will be resolved only when data is fetched from host.
       // and we need to create a request manager to handle the remote requests and responses
+      console.log("Recieved body from developer : ",req.body)
       let hostId = hostAccessUrl.split("/")[2];
       // let hostDeviceId = await get_host_info_list_cache(hostId);
       //check if host is currently available on line or not?
