@@ -139,8 +139,10 @@ websocketListener.on('connection', (socket) => {
     console.log("Data recieved from host is : ",JSON.parse(payload));
     addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
   })
-
-});
+  socket.on("disconnect", (reason) => {
+    console.log("on disconnect",reason);
+  });
+}); 
 
 module.exports = {
   generateTokenWithId,verifyToken,websocketListener,server
