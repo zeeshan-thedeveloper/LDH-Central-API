@@ -68,10 +68,12 @@ const executeMysqlQuery=async (req, res)=>{
             resolve(response);//we need to send query response.
           }else{
             // host could be found in any cache. .. need to restart the host application in this case.
+            console.log("can not find host in cache")
             reject(null);
           }
         }
       },(err)=>{
+        console.log("Error while  checkIfHostIsConnectedAndOnline",err)
         reject(null);
       })
       

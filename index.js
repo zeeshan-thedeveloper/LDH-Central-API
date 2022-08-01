@@ -63,6 +63,7 @@ const { consumer } = require("./routes/consumerRoutes");
 const {
   addUpdate_available_and_connected_host_list_cache,
   addUpdate_developers_host_access_url_request_list_cache,
+  removeItemFrom_available_and_connected_host_list_cache,
 } = require("./cache-store/cache-operations");
 const { Worker } = require("worker_threads");
 const {
@@ -172,8 +173,9 @@ websocketListener.on("connection", (socket) => {
 
   socket.on("resolvingMySQL", (payload) => {
     const { requestId, hostId, query, databaseName, response, hostDeviceId } =
-      JSON.parse(payload);
-    console.log("Data recieved from host is : ", JSON.parse(payload));
+    JSON.parse(payload);
+    console.log("Data received from host is : ", JSON.parse(payload));
+    console.log("Current socket id for joining host",socket.id)
     addUpdate_developers_host_access_url_request_list_cache(
       hostId,
       requestId,
@@ -181,10 +183,12 @@ websocketListener.on("connection", (socket) => {
       databaseName,
       response
     );
+    
     addUpdate_available_and_connected_host_list_cache(
       hostId,
       hostDeviceId,
-      "connected"
+      "connected",
+      socket.id
     );
   });
 
@@ -194,24 +198,26 @@ websocketListener.on("connection", (socket) => {
       socket.connect();
     }
     console.log("on disconnect", reason);
+    console.log("Disconnected host is ",socket.id)
+    removeItemFrom_available_and_connected_host_list_cache(socket.id);
   });
 });
 
 //host watcher
 
-setInterval(() => {
-  let available_and_connected_host_list =
-    available_and_connected_host_list_cache.get(
-      "available_and_connected_host_list_cache"
-    );
-  watchHosts_Service(available_and_connected_host_list)
-    .then((watchResponse) => {
-      console.log(watchResponse);
-    })
-    .catch((err) => {
-      console.log("error", err);
-    });
-}, 3000);
+// setInterval(() => {
+//   let available_and_connected_host_list =
+//     available_and_connected_host_list_cache.get(
+//       "available_and_connected_host_list_cache"
+//     );
+//   watchHosts_Service(available_and_connected_host_list)
+//     .then((watchResponse) => {
+//       console.log(watchResponse);
+//     })
+//     .catch((err) => {
+//       console.log("error", err);
+//     });
+// }, 3000);
 
 module.exports = {
   generateTokenWithId,

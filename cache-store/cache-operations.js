@@ -113,7 +113,7 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
     return list;
 }
 
-const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,connectionStatus) => {
+const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,connectionStatus,socketId) => {
     let  list = available_and_connected_host_list_cache.get("available_and_connected_host_list_cache") 
     let flag=false;
     /*
@@ -122,41 +122,73 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
         hostDeviceId: hostDeviceId,
     }
      */
-    list = list.map(element => {
-        if (element.hostId==hostId) {
-         
-            element.hostId=hostId,
-            element.hostDeviceId= hostDeviceId,
-            element.connectionStatus=connectionStatus
-            flag=true;
-            console.log("host status updated",hostId)
-            return element;
-        }
-    });
-    if(!flag){
-        available_and_connected_host_list_cache.get("available_and_connected_host_list_cache").push({
-           hostId:hostId,
-           hostDeviceId: hostDeviceId,
-           connectionStatus:connectionStatus
+    if(list!=null){
+        list = list.map(element => {
+            if(element!=undefined){
+                if (element.hostId==hostId) {
+             
+                    element.hostId=hostId,
+                    element.hostDeviceId= hostDeviceId,
+                    element.connectionStatus=connectionStatus
+                    element.socketId=socketId
+                    console.log("host status updated",hostId)
+                    flag=true;
+                    return element;
+                }
+            }
+          
         });
-        console.log("new host is available and connected")
+        if(!flag){
+            available_and_connected_host_list_cache.get("available_and_connected_host_list_cache").push({
+               hostId:hostId,
+               hostDeviceId: hostDeviceId,
+               connectionStatus:connectionStatus,
+               socketId:socketId
+            });
+            console.log("new host is available and connected")
+        }
+        else{
+            available_and_connected_host_list_cache.put("available_and_connected_host_list_cache",list);
+        }
+        console.log("updated cache available_and_connected_host_list_cache ")    
     }
-    else{
-        available_and_connected_host_list_cache.put("available_and_connected_host_list_cache",list);
-    }
-    console.log("updated cache available_and_connected_host_list_cache ")
+    
     return list;
 }
+
+const removeItemFrom_available_and_connected_host_list_cache=(socketId) => {
+    let  list = available_and_connected_host_list_cache.get("available_and_connected_host_list_cache") 
+   
+    list = list.map(element => {
+                if(element!=undefined){
+                    if (element.socketId!=socketId) {
+                        return element;
+                    }else{
+                        console.log("removed host Id: ",element.hostId)
+                    }
+                }
+    });
+        available_and_connected_host_list_cache.put("available_and_connected_host_list_cache",list);
+        console.log("updated cache available_and_connected_host_list_cache ")
+     
+    return list;
+}
+
 
 const getItem_available_and_connected_host_list_cache=(hostId)=>{
     let  list =available_and_connected_host_list_cache.get("available_and_connected_host_list_cache") 
     let user=null;
+    if(list!=null)
+    {
         list.forEach(element => {
-            if (element.hostId==hostId){
-                user = element;
+            if(element!=undefined){
+                if (element.hostId==hostId){
+                    user = element;
+                }
             }
+         
         });
-
+    }
     return user;
 }
 
@@ -181,5 +213,6 @@ module.exports={
     addUpdate_developers_host_access_url_request_list_cache,
     addUpdate_available_and_connected_host_list_cache,
     getItem_available_and_connected_host_list_cache,
-    getItem_developers_host_access_url_request_list_cache
+    getItem_developers_host_access_url_request_list_cache,
+    removeItemFrom_available_and_connected_host_list_cache
 }
