@@ -67,17 +67,7 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId,lastSeenDateAndTime)
 const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,query,database,response) => {
     let  list = developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache") 
     let flag=false;
-    /*
-    {
-        requestId:"",
-        hostId:"",
-        query:"",
-       
-        database:"",
-        response:"",
-    }
-     */
-
+   
     list = list.map(element => {
         console.log("Current request",element)
         if(element!=undefined){
@@ -92,9 +82,8 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
                 console.log("Request updated  : ",requestId)
                 return element;
             }
-        }
+        }  
 
-        
     });
     if(!flag){
         developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache").push({
@@ -122,6 +111,7 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
         hostDeviceId: hostDeviceId,
     }
      */
+    
     if(list!=null){
         list = list.map(element => {
             if(element!=undefined){

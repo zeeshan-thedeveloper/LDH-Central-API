@@ -1,6 +1,7 @@
 const express=require('express')
 const consumerLayerControllers = require('../controllers/consumerLayerControllers');
 const hostAccessUrlController=require('../controllers/hostAccessEndPointsControllers')
+const authScheme=require('../middlewares')
 const consumer=express()
 
 consumer.post("/getListOfServiceProviders",consumerLayerControllers.getListOfServiceProviders);
@@ -9,7 +10,7 @@ consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getL
 consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getListOfActiveHostsByDeveloperId);
 consumer.post("/generateTokenForDeveloper",consumerLayerControllers.generateTokenForDeveloper);
 consumer.post("/getHostAccessUrlToken",hostAccessUrlController.getHostAccessUrlToken);
-consumer.post("/executeMysqlQuery",hostAccessUrlController.executeMysqlQuery);
+consumer.post("/executeMysqlQuery",authScheme.verifyJwt,hostAccessUrlController.executeMysqlQuery);
 
 module.exports = {
     consumer
