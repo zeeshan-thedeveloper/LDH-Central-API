@@ -150,9 +150,9 @@ const createAdminAccount = async (req, res) => {
   }
 };
  
-
 const getListOfAdminAccounts = (req, res) => {
-
+  const {hostId} = req.body 
+  let statusResult=''
   admin_users_schema.find({}, (err, data) => {
     if(err) {
       res
@@ -166,25 +166,68 @@ const getListOfAdminAccounts = (req, res) => {
     }
     else{
       // console.log(data)
-      let results = data.map((record)=>{
+      let results =  data.map((record)=>{
         return {
           id:record._id,
           firstName: record.firstName,
           lastName: record.lastName,
           email: record.email,  
-          profilePhotoUrl:record.profilePhotoUrl   
+          profilePhotoUrl:record.profilePhotoUrl ,
+         connectedHostList:record.connectedHostList
         }
       })
+          
+      const QueryExecutter = (hostId)=>{
+        return new Promise(async(resolve,reject)=>{
+         const queryResult = await host_users_schema.findOne({hostId:hostId},(err,data)=>{
+          if(error){
+            res
+            .status(200)
+            .send({ 
+              responseCode:COULD_NOT_FETCH,
+              responseMessage:
+               "Error in fetching host data from host user schema",
+               payload: err
+               });
+          }else{
+            if(data){
+               resolve(data)
+            }   
+          } 
+         }).catch((error)=>{
+          reject(error);
+        });
+        })}
+
+
+       console.log("conected host list "+results.connectedHostList)
+    
+      const promise = results.connectedHostList.map(QueryExecutter(hostId))
+             const HostDataResult = Promise.all(promise);
+             HostDataResult.then((data)=>{
+                console.log(data)
+                statusResult = data.map((record)=>{
+                  return {
+                    isConnected:data.isConnected
+                  }
+                })
+             })
+            
+      
+     
       res.status(200).send({ 
           responseMessage: " Data fetched successfully ",
           responseCode: FETCHED,
-          responsePayload:results
+          responsePayload:Finalresults
       })
     }
   })
 
  
 };
+
+
+
 
 const getListOfDeveloperAccounts = (req, res) => {
 
