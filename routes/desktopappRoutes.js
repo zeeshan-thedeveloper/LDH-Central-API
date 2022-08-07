@@ -4,7 +4,7 @@ const hostLayerController = require('../controllers/hostLayerControllers');
 const hostAccessUrlController=require('../controllers/hostAccessEndPointsControllers')
 const desktopApp=express()
 
-desktopApp.get("/getListOfAdminAccounts",authController.getListOfAdminAccounts);
+desktopApp.post("/getListOfAdminAccounts",authController.getListOfAdminAccounts);
 desktopApp.get("/getListOfDevelopersAccounts",authController.getListOfDeveloperAccounts);
 desktopApp.post("/addHostInRequestList",hostLayerController.addHostInRequestList);
 desktopApp.post("/updateHostConnectionStatus",hostLayerController.updateHostConnectionStatus);

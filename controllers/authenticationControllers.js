@@ -33,6 +33,9 @@ const {
   verifyToken,
 } = require("../token-manager/token-manager");
 const { FRONT_END_BASE_URL } = require("../request-manager/urls");
+const {
+  host_users_schema,
+} = require("../mongodb/schemas/host-schemas/host-users");
 
 const expires_in = "600s";
 
@@ -129,7 +132,7 @@ const createAdminAccount = async (req, res) => {
             console.log("insertedData", insertedData);
             res.status(200).send({
               responseMessage: "Account created successfully",
-              responseCode:ACCONT_CREATED,
+              responseCode: ACCONT_CREATED,
               responsePayload: insertedData,
             });
           } else {
@@ -149,76 +152,96 @@ const createAdminAccount = async (req, res) => {
   } else if (authType == "userName&Password") {
   }
 };
- 
 
 const getListOfAdminAccounts = (req, res) => {
+  const { hostId } = req.body;
 
   admin_users_schema.find({}, (err, data) => {
-    if(err) {
-      res
-      .status(200)
-      .send({ 
-        responseCode:COULD_NOT_FETCH,
-        responseMessage:
-         "Error in fetching list of admins",
-         payload: err
-         });
-    }
-    else{
-      // console.log(data)
-      let results = data.map((record)=>{
-        return {
-          id:record._id,
-          firstName: record.firstName,
-          lastName: record.lastName,
-          email: record.email,  
-          profilePhotoUrl:record.profilePhotoUrl   
-        }
-      })
-      res.status(200).send({ 
+    if (err) {
+      res.status(200).send({
+        responseCode: COULD_NOT_FETCH,
+        responseMessage: "Error in fetching list of admins",
+        payload: err,
+      });
+    } else {
+      const fetchTheCompleteHost = (host) => {
+        return new Promise(async (resolve, reject) => {
+          const hostDetails = await host_users_schema.findOne({
+            hostId: host.hostId,
+          });
+
+          resolve(hostDetails);
+        });
+      };
+
+      const processAdmin = (admin) => {
+        return new Promise((resolve, reject) => {
+          const promises = admin.connectedHostList.map(fetchTheCompleteHost);
+          const results = Promise.all(promises);
+          results.then((resolvedData) => {
+           let listOfConnectedHosts =  resolvedData.map((host)=>{
+              if(host.hostId==hostId) return host
+            })
+            const recordToReturn = {
+              id: admin._id,
+              firstName: admin.firstName,
+              lastName: admin.lastName,
+              email: admin.email,
+              profilePhotoUrl: admin.profilePhotoUrl,
+              connectedHostList: listOfConnectedHosts,
+            };
+            resolve(recordToReturn);
+          });
+        });
+      };
+
+      const processAdminObjects = (listOfAdmin) => {
+        return new Promise(async (resolve, reject) => {
+          const promises = listOfAdmin.map(processAdmin);
+          const results = Promise.all(promises);
+          results.then((resolvedData) => {
+            resolve(resolvedData);
+          });
+        });
+      };
+
+      processAdminObjects(data).then((results) => {
+        res.status(200).send({
           responseMessage: " Data fetched successfully ",
           responseCode: FETCHED,
-          responsePayload:results
-      })
+          responsePayload: results,
+        });
+      });
     }
-  })
-
- 
+  });
 };
 
 const getListOfDeveloperAccounts = (req, res) => {
-
   developers_users_schema.find({}, (err, data) => {
-    if(err) {
-      res
-      .status(200)
-      .send({ 
-        responseCode:COULD_NOT_FETCH,
-        responseMessage:
-         "Error in fetching list of admins",
-         payload: err
-         });
-    }
-    else{
+    if (err) {
+      res.status(200).send({
+        responseCode: COULD_NOT_FETCH,
+        responseMessage: "Error in fetching list of admins",
+        payload: err,
+      });
+    } else {
       // console.log(data)
-      let results = data.map((record)=>{
+      let results = data.map((record) => {
         return {
-          id:record._id,
+          id: record._id,
           firstName: record.firstName,
           lastName: record.lastName,
-          email: record.email,  
-          profilePhotoUrl:record.profilePhotoUrl   
-        }
-      })
-      res.status(200).send({ 
-          responseMessage: " Data fetched successfully ",
-          responseCode: FETCHED,
-          responsePayload:results
-      })
+          email: record.email,
+          profilePhotoUrl: record.profilePhotoUrl,
+        };
+      });
+      res.status(200).send({
+        responseMessage: " Data fetched successfully ",
+        responseCode: FETCHED,
+        responsePayload: results,
+      });
     }
-  })
-
- 
+  });
 };
 
 const verifyJWTToken = (req, res) => {
@@ -228,39 +251,31 @@ const verifyJWTToken = (req, res) => {
     const verficationResponse = verifyToken(token);
     console.log("verify token: ", verficationResponse);
     if (verficationResponse.key != undefined) {
-      res
-        .status(200)
-        .send({
-          responseMessage: "Token is verified",
-          responseCode: TOKEN_VERIFIED,
-        });
+      res.status(200).send({
+        responseMessage: "Token is verified",
+        responseCode: TOKEN_VERIFIED,
+      });
     } else {
       // problem
-      res
-        .status(200)
-        .send({
-          responseMessage: verficationResponse.message,
-          responseCode: TOKEN_NOT_VERIFIED,
-        });
-    }
-  } else {
-    res
-      .status(200)
-      .send({
-        responseMessage: "Token is null",
+      res.status(200).send({
+        responseMessage: verficationResponse.message,
         responseCode: TOKEN_NOT_VERIFIED,
       });
+    }
+  } else {
+    res.status(200).send({
+      responseMessage: "Token is null",
+      responseCode: TOKEN_NOT_VERIFIED,
+    });
   }
 };
 
 const getJWTToken = (req, res) => {
   const { id } = req.body;
-  res
-    .status(200)
-    .send({
-      responseMessage: "Token generated",
-      jwtToken: generateTokenWithId({ token: id }),
-    });
+  res.status(200).send({
+    responseMessage: "Token generated",
+    jwtToken: generateTokenWithId({ token: id }),
+  });
 };
 
 // tester end-points
@@ -281,5 +296,4 @@ module.exports = {
   verifyJWTToken,
   getJWTToken,
   test,
-  
 };
