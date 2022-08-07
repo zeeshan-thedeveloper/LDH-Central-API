@@ -44,7 +44,7 @@ const getHostAccessUrlToken=(req, res)=>{
 const executeMysqlQuery=async (req, res)=>{
   const {secretKey,hostAccessUrl,query,databaseName} = req.body
   const response = ()=>{
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve, reject_outer) => {
       // this will be resolved only when data is fetched from host.
       // and we need to create a request manager to handle the remote requests and responses
       console.log("Recieved body from developer : ",req.body)
@@ -53,7 +53,6 @@ const executeMysqlQuery=async (req, res)=>{
       //check if host is currently available on line or not?
       //if not available then make notification request.
       const requestId = uuidv1();
-
       checkIfHostIsConnectedAndOnline(hostId,query,databaseName,requestId).then(async (response)=>{
         if(response){
           // available online
@@ -69,12 +68,12 @@ const executeMysqlQuery=async (req, res)=>{
           }else{
             // host could be found in any cache. .. need to restart the host application in this case.
             console.log("can not find host in cache")
-            reject(null);
+            reject_outer(null);
           }
         }
       },(err)=>{
         console.log("Error while  checkIfHostIsConnectedAndOnline",err)
-        reject(null);
+        reject_outer(null);
       })
       
     })
@@ -87,6 +86,7 @@ const executeMysqlQuery=async (req, res)=>{
       responsePayload:success
     })
   },(fail)=>{
+    console.log("Response -2 : ",fail);
     res.send({
       responseMessage:"could not successfully resolved the query with response  ",
       responsePayload:fail

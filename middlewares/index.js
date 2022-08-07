@@ -7,7 +7,7 @@ const verifyJwt=(req,res,next) => {
     if(authToken!=undefined) {
         let response = verifyToken(authToken);
         console.log("response",response)
-        if(response!="TokenExpiredError: jwt expired"){
+        if(response==true) {
             console.log("Token is verified");
             next();
         }else{
@@ -17,7 +17,7 @@ const verifyJwt=(req,res,next) => {
         }
     }else{
         res.status(502).send({
-            responseMessage:"Could not find the token in"
+            responseMessage:"Could not find the token in request header"
         })
     }
 }

@@ -11,7 +11,7 @@ const verifyToken=(token)=>{
     try{
     let jwtSecretKey = "zeejintubachurail";
     const verified = jwt.verify(token, jwtSecretKey);
-    return verified;
+    return true;
     }catch(e){
         return e;
     }
