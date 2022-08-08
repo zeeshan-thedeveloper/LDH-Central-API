@@ -52,8 +52,8 @@ const executeMysqlQuery=async (req, res)=>{
       // let hostDeviceId = await get_host_info_list_cache(hostId);
       //check if host is currently available on line or not?
       //if not available then make notification request.
-      const requestId = uuidv1();
-
+      const requestId = uuidv1(); 
+ 
       checkIfHostIsConnectedAndOnline(hostId,query,databaseName,requestId).then(async (response)=>{
         if(response){
           // available online

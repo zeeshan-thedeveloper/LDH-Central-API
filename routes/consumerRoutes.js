@@ -10,7 +10,7 @@ consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getL
 consumer.post("/getListOfActiveHostsByDeveloperId",consumerLayerControllers.getListOfActiveHostsByDeveloperId);
 consumer.post("/generateTokenForDeveloper",consumerLayerControllers.generateTokenForDeveloper);
 consumer.post("/getHostAccessUrlToken",hostAccessUrlController.getHostAccessUrlToken);
-consumer.post("/executeMysqlQuery",middleware.verifyJwt,middleware.isHostAccessUrlEnabled,middleware.isUserAllowedToPerformRequestedQuery,hostAccessUrlController.executeMysqlQuery);
+consumer.post("/executeMysqlQuery",middleware.verifyJwt,middleware.isHostAccessUrlEnabled,middleware.isUserAllowedToUseTheUrl,middleware.isUserAllowedToPerformRequestedQuery,hostAccessUrlController.executeMysqlQuery);
 
 module.exports = {
     consumer
