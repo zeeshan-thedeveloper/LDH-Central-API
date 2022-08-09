@@ -37,7 +37,7 @@ const {
   host_users_schema,
 } = require("../mongodb/schemas/host-schemas/host-users");
 
-const expires_in = "600s";
+const expires_in = "1h";
 
 // ----------------------------- GOOGLE Auth -------------------
 

@@ -155,18 +155,22 @@ const getListOfConnectedHostsByAdminId= (req, res) => {
           hostAcessUrl:item.hostAcessUrl
         }
         let flag=false;
-        list.forEach((storedHostInfo)=>{
-          if(storedHostInfo.hostId==item.hostId){
-            record = {...record,lastSeenDateAndTime:storedHostInfo.lastSeenDateAndTime}
-            flag=true;
+
+        if(list.length>0){
+          list.forEach((storedHostInfo)=>{
+            if(storedHostInfo!=undefined)
+            if(storedHostInfo.hostId==item.hostId){
+              record = {...record,lastSeenDateAndTime:storedHostInfo.lastSeenDateAndTime}
+              flag=true;
+            }
+          })
           }
-        })
         if(!flag){
           record = {...record,lastSeenDateAndTime:"Not online"}
         }
         result.push(record);
     })
-    console.log("Send list of pending hosts",res)
+    // console.log("Send list of pending hosts",res)
     res.status(200).send({
       responseMessage:"List of connected hosts",
       responseCode:FETCHED,
@@ -235,6 +239,25 @@ const updateDeviceIdInCache = (req, res)=>{
   })
 }
 
+const getHostsByAdminId=(req,res)=>{
+  const {adminId}=req.body;
+  host_users_schema.find({connectedAdmin:adminId},(err,data)=>{
+    if(!err){
+      res.status(200).send({
+        responseMessage:"Successfully loaded the list of all hosts",
+        responseCode:FETCHED,
+        responsePayload:data
+      })
+    }else{
+      res.status(200).send({
+        responseMessage:"Could not load the list of all hosts",
+        responseCode:COULD_NOT_FETCH,
+        responsePayload:err
+      })
+    }
+  })
+}
+
 const getInfo = (req, res) => {
   let  list = hosts_info_list_cache.get("hosts_info_list_cache") 
   res.status(200).send({
@@ -250,5 +273,6 @@ module.exports = {
   updateDeviceIdInCache,
   getListOfPendingHostsByAdminId,
   getListOfConnectedHostsByAdminId,
-  getInfo
+  getInfo,
+  getHostsByAdminId
 };

@@ -17,6 +17,8 @@ const {
   addRequestInDeniedRequestHistory,
 } = require("../request-manager/request-manager");
 const { getCurrentDataAndTime } = require("../utils/utils");
+const { admin_users_schema } = require("../mongodb/schemas/admin-schemas/admin-users");
+const { decrypt } = require("../encryptionAndDecryption/encryptionAndDecryption");
 
 const verifyJwt = (req, res, next) => {
   const authToken = req.headers.authorization.split(" ")[1];
@@ -40,7 +42,35 @@ const verifyJwt = (req, res, next) => {
   }
 };
 
-//TODO:We need to create a middle ware for checking if source host is enabled to be used. Look host url status with host id
+const verifyAdminUserUid=(req,res,next)=>{
+
+    console.log(req.body)
+    const {userUid,secretKey}=req.body;
+    
+    const decryptedUserUid = decrypt(userUid);
+    admin_users_schema.findOne({email:secretKey},(err,data)=>{
+      if(!err){
+          const storedUserUid = decrypt(data.userUid);
+          if(decryptedUserUid==storedUserUid){
+            next();
+          }else{
+            res.status(501).send({
+              responseMessage:"Could not verify the user uid",
+              responseCode:ERROR_IN_MIDDLEWARE,
+              responsePayload:null
+            })
+          }
+      }else{
+        console.log(err)
+        res.status(200).send({
+          responseMessage:"Error while fetching the admin user in middleware : verifyAdminUserUid ",
+          responseCode:ERROR_IN_MIDDLEWARE,
+          responsePayload:err
+        })
+      }
+    })
+}
+
 const isHostAccessUrlEnabled = (req, res, next) => {
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
@@ -100,7 +130,6 @@ const isHostAccessUrlEnabled = (req, res, next) => {
   }
 };
 
-//TODO:We need to create a middle ware for checking if the targeted host is allowed to use or not.
 const isUserAllowedToUseTheUrl = (req, res, next) => {
   console.log("isUserAllowedToUseTheUrl");
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
@@ -160,7 +189,7 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
     }
   });
 };
-//TODO:We need to create a middle ware for checking the query and assigned role.
+
 const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
   const readOnlyOperators = ["select"];
   const writeOnlyOperators = ["delete", "drop", "update"];
@@ -320,11 +349,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }
               );
 
-              // res.status(502).send({
-              //   responseMessage:
-              //     "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
-              //   responseCode: ERROR_IN_MIDDLEWARE,
-              // });
+          
             }
           } else if (element.accessRole == "1203") {
             //read write only
@@ -376,12 +401,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             });
           }
         });
-        // if(flag){
-        //   res.status(502).send({
-        //     responseMessage:"You are not allowed to use this url",
-        //     responseCode:ERROR_IN_MIDDLEWARE
-        //   })
-        // }
+    
       } else {
         res.status(502).send({
           responseMessage: "Invalid secret key",
@@ -400,24 +420,64 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
   }
 };
 
-// const storeToDeniedRequest=( requestId,secretKey,hostId,payload,statusMessage,statusCode,adminId)=>{
-//   addRequestInDeniedRequestHistory(
-//     requestId,
-//     secretKey,
-//     hostId,
-//     payload,
-//     getCurrentDataAndTime(),
-//     JSON.stringify({
-//       statusMessage: statusMessage,
-//       statusCode: statusCode,
-//     }),
-//     false,
-//     adminId
-//   );
-// }
+const processAdminQuery=(req,res,next)=>{
+  const readOnlyOperators = ["select"];
+  const writeOnlyOperators = ["delete", "drop", "update"];
+  const { secretKey, hostAccessUrl, query, databaseName } = req.body;
+  let hostId = hostAccessUrl.split("/")[2];
+  let adminId = hostAccessUrl.split("/")[3];
+  let startingKeyWord = query.split(" ")[0];
+  startingKeyWord = startingKeyWord.toLowerCase();
+  const requestId = Math.round(new Date().getTime() / 1000);
+ 
+  if (
+    startingKeyWord == writeOnlyOperators[0] ||
+    startingKeyWord == writeOnlyOperators[1] ||
+    startingKeyWord == writeOnlyOperators[2] ||
+    startingKeyWord == readOnlyOperators[0]
+  ) {
+    next();
+  } else {
+    addRequestInDeniedRequestHistory(
+      requestId,
+      secretKey,
+      hostId,
+      JSON.stringify({
+        query,
+        databaseName,
+      }),
+      getCurrentDataAndTime(),
+      JSON.stringify({
+        statusMessage:
+          "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+        statusCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
+      }),
+      false,
+      adminId
+    ).then(
+      (data) => {
+        res.status(502).send({
+          responseMessage:
+            "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+          responseCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
+        });
+      },
+      (error) => {
+        console.log(error);
+        res.status(502).send({
+          responseMessage: "Error while storing data in db",
+          responseCode: ERROR_IN_MIDDLEWARE,
+        });
+      }
+    );
+  }
+}
+
 module.exports = {
   verifyJwt,
   isHostAccessUrlEnabled,
   isUserAllowedToUseTheUrl,
   isUserAllowedToPerformRequestedQuery,
+  verifyAdminUserUid,
+  processAdminQuery
 };

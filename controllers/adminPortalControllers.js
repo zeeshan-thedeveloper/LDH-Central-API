@@ -1,3 +1,4 @@
+const { admin_users_schema } = require("../mongodb/schemas/admin-schemas/admin-users");
 const {
   developers_users_schema,
 } = require("../mongodb/schemas/consumer-schemas/developer-users");
@@ -220,8 +221,13 @@ const getListOfDeniedRequestsByAdminId = async (req, res) => {
   if (data) {
       const getData=(request)=>{
         return new Promise(async(resolve,reject)=>{
-           const dev =await developers_users_schema.findOne({email:request.requestSender});
+          const dev =await developers_users_schema.findOne({email:request.requestSender});
+          if(dev){
             resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName})
+          }else{
+           const adm =await admin_users_schema.findOne({email:request.requestSender}); 
+           resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName})       
+          }
         })
     }
     const fetchDeveloperData = (listOfRequests) => {
@@ -258,7 +264,12 @@ const getListOfResolvedRequestsByAdminId = async (req, res) => {
       const getData=(request)=>{
         return new Promise(async(resolve,reject)=>{
            const dev =await developers_users_schema.findOne({email:request.requestSender});
-            resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName})
+           if(dev){
+             resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName})
+           }else{
+            const adm =await admin_users_schema.findOne({email:request.requestSender}); 
+            resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName})       
+           }
         })
     }
     const fetchDeveloperData = (listOfRequests) => {

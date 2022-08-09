@@ -1,7 +1,9 @@
 const express=require('express')
 const authController=require('../controllers/authenticationControllers')
 const hostAccessUrlController=require('../controllers/hostAccessEndPointsControllers')
+const hostController=require("../controllers/hostLayerControllers")
 const adminPortalControllers = require('../controllers/adminPortalControllers')
+const middleware = require("../middlewares/index");
 const webportal=express()
 
 // Auth router
@@ -20,6 +22,8 @@ webportal.post("/updateStatusOfDevConReq",adminPortalControllers.updateStatusOfD
 webportal.post("/getListOfDevelopersAccountsByAdminId",adminPortalControllers.getListOfDevelopersAccountsByAdminId);
 webportal.post("/getListOfDeniedRequestsByAdminId",adminPortalControllers.getListOfDeniedRequestsByAdminId);
 webportal.post("/getListOfResolvedRequestsByAdminId",adminPortalControllers.getListOfResolvedRequestsByAdminId);
+webportal.post("/getHostsByAdminId",hostController.getHostsByAdminId);
+webportal.post("/testHostAccessUrl",middleware.verifyJwt,middleware.isHostAccessUrlEnabled,middleware.processAdminQuery,middleware.verifyAdminUserUid,hostAccessUrlController.executeMysqlQuery);
 
 module.exports = {
     webportal

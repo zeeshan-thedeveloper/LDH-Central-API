@@ -42,7 +42,9 @@ const getHostAccessUrlToken=(req, res)=>{
 }
 
 const executeMysqlQuery=async (req, res)=>{
+
   const {secretKey,hostAccessUrl,query,databaseName} = req.body
+
   const response = ()=>{
     return new Promise(async (resolve, reject) => {
       // this will be resolved only when data is fetched from host.
@@ -51,11 +53,10 @@ const executeMysqlQuery=async (req, res)=>{
       let hostId = hostAccessUrl.split("/")[2]; 
       let adminId = hostAccessUrl.split("/")[3]; 
       
-      // let hostDeviceId = await get_host_info_list_cache(hostId);
       //check if host is currently available on line or not?
       //if not available then make notification request.
-      const requestId = uuidv1(); 
- 
+
+     const requestId = Math.round(new Date().getTime() / 1000);
       checkIfHostIsConnectedAndOnline(hostId,query,databaseName,requestId,secretKey,adminId).then(async (response)=>{
         if(response){
           // available online
@@ -98,8 +99,6 @@ const executeMysqlQuery=async (req, res)=>{
 
 const resolveMYSQLQuery=(req, res) => {
   const {hostId,requestId,query,response,databaseName} = req.body
-  console.log("rec request id : ",requestId)
-  console.log("rec response",response)
   addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
   res.status(200).send({responseMessage:"Resolved query successfully"})
 }
@@ -108,5 +107,5 @@ module.exports ={
     setStatusOfHostAccessUrl,
     getHostAccessUrlToken,
     executeMysqlQuery,
-    resolveMYSQLQuery
+    resolveMYSQLQuery,
 }
