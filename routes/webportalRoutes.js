@@ -18,6 +18,7 @@ webportal.post("/setStatusOfHostAccessUrl",hostAccessUrlController.setStatusOfHo
 webportal.post("/getListOfDevelopersRequestsByAdminId",adminPortalControllers.getListOfDevelopersRequestsByAdminId);
 webportal.post("/updateStatusOfDevConReq",adminPortalControllers.updateStatusOfDevConReq);
 webportal.post("/getListOfDevelopersAccountsByAdminId",adminPortalControllers.getListOfDevelopersAccountsByAdminId);
+webportal.post("/getListOfDeniedRequestsByAdminId",adminPortalControllers.getListOfDeniedRequestsByAdminId);
 
 module.exports = {
     webportal
