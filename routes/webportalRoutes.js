@@ -19,6 +19,7 @@ webportal.post("/getListOfDevelopersRequestsByAdminId",adminPortalControllers.ge
 webportal.post("/updateStatusOfDevConReq",adminPortalControllers.updateStatusOfDevConReq);
 webportal.post("/getListOfDevelopersAccountsByAdminId",adminPortalControllers.getListOfDevelopersAccountsByAdminId);
 webportal.post("/getListOfDeniedRequestsByAdminId",adminPortalControllers.getListOfDeniedRequestsByAdminId);
+webportal.post("/getListOfResolvedRequestsByAdminId",adminPortalControllers.getListOfResolvedRequestsByAdminId);
 
 module.exports = {
     webportal

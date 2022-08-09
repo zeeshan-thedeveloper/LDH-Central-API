@@ -215,8 +215,19 @@ websocketListener.on("connection", (socket) => {
       adminId
     );
 
-    //TODO: store resolved queries in db
-
+    addRequestInResolvedRequestHistory(
+      requestId,
+      secretKey,
+      hostId,
+      JSON.stringify({
+        query,
+        databaseName,
+      }),
+      getCurrentDataAndTime(),
+      JSON.stringify({ response: response }),
+      adminId
+    );
+    
     addUpdate_available_and_connected_host_list_cache(
       hostId,
       hostDeviceId,

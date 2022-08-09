@@ -10,6 +10,7 @@ const {
 const {
   denied_requests_history_schema,
 } = require("../mongodb/schemas/request-history-schema/denied-request-history-schema");
+const { resolved_requests_history_schema } = require("../mongodb/schemas/request-history-schema/resolved-request-history-schema");
 const {
   FETCHED,
   COULD_NOT_FETCH,
@@ -248,9 +249,49 @@ const getListOfDeniedRequestsByAdminId = async (req, res) => {
   }
 };
 
+const getListOfResolvedRequestsByAdminId = async (req, res) => {
+  const { adminId } = req.body;
+  const data = await resolved_requests_history_schema
+    .find({ adminId: adminId })
+    .sort({ requestId: -1 });
+  if (data) {
+      const getData=(request)=>{
+        return new Promise(async(resolve,reject)=>{
+           const dev =await developers_users_schema.findOne({email:request.requestSender});
+            resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName})
+        })
+    }
+    const fetchDeveloperData = (listOfRequests) => {
+      return new Promise((resolve, reject) => {
+        const promises = listOfRequests.map(getData);
+        const results = Promise.all(promises);
+        results.then((data)=>{
+            resolve(data)
+        })
+      });
+    };
+    fetchDeveloperData(data).then((data) => {
+      res.status(200).send({
+        responseMessage: "Successfully loaded the list of resolved requests",
+        responseCode: FETCHED,
+        responsePayload: data,
+      });
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not load the list of resolved requests",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: err,
+    });
+  }
+};
+
+
 module.exports = {
   getListOfDevelopersRequestsByAdminId,
   updateStatusOfDevConReq,
   getListOfDevelopersAccountsByAdminId,
   getListOfDeniedRequestsByAdminId,
+  getListOfResolvedRequestsByAdminId,
+  
 };
