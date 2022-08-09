@@ -155,7 +155,7 @@ const createAdminAccount = async (req, res) => {
 
 const getListOfAdminAccounts = (req, res) => {
   const { hostId } = req.body;
-
+  console.log("here is host id "+hostId)
   admin_users_schema.find({}, (err, data) => {
     if (err) {
       res.status(200).send({
@@ -169,7 +169,7 @@ const getListOfAdminAccounts = (req, res) => {
           const hostDetails = await host_users_schema.findOne({
             hostId: host.hostId,
           });
-
+          console.log(hostDetails);
           resolve(hostDetails);
         });
       };
