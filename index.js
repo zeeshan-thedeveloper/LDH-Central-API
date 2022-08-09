@@ -176,6 +176,7 @@ websocketListener.on("connection", (socket) => {
     JSON.parse(payload);
     console.log("Data received from host is : ", JSON.parse(payload));
     console.log("Current socket id for joining host",socket.id)
+
     addUpdate_developers_host_access_url_request_list_cache(
       hostId,
       requestId,
@@ -184,12 +185,16 @@ websocketListener.on("connection", (socket) => {
       response
     );
     
+    //TODO: store resolved queries in db
+
     addUpdate_available_and_connected_host_list_cache(
       hostId,
       hostDeviceId,
       "connected",
       socket.id
     );
+
+
   });
 
   socket.on("disconnect", (reason) => {

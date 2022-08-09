@@ -37,7 +37,7 @@ const addHostInRequestList = (req, res) => {
         isConnected: "Pending",
         hostName:hostName,
         hostAcessUrl:{
-          url:`/${hostName}/${hostId}`,
+          url:`/${hostName}/${hostId}/${adminId}`,
           numberOfHits:0
         }
       };
@@ -106,12 +106,16 @@ const getListOfPendingHostsByAdminId= (req, res) => {
           hostAcessUrl:item.hostAcessUrl
         }
         let flag=false;
+        console.log(list)
+        if(list.length>0){
         list.forEach((storedHostInfo)=>{
+          if(storedHostInfo!=undefined)
           if(storedHostInfo.hostId==item.hostId){
             record = {...record,lastSeenDateAndTime:storedHostInfo.lastSeenDateAndTime}
             flag=true;
           }
         })
+        }
         if(!flag){
           record = {...record,lastSeenDateAndTime:"Not online"}
         }

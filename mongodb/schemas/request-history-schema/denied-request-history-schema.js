@@ -27,8 +27,12 @@ const requests = new mongoose.Schema({
     requestResolved:{
         type:Boolean,
         required:true
+    },
+    adminId:{
+      type: String,
+      required: true,
     }
 });
 
-const requests_history_schema = mongoose.model("requests_history_schema", requests);
-module.exports = {requests_history_schema};
+const denied_requests_history_schema = mongoose.model("denied_requests_history_schema", requests);
+module.exports = {denied_requests_history_schema};

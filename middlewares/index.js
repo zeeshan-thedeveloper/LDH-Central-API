@@ -14,7 +14,7 @@ const {
 const { verifyToken } = require("../token-manager/token-manager");
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
 const {
-  addRequestInRequestHistory,
+  addRequestInDeniedRequestHistory,
 } = require("../request-manager/request-manager");
 const { getCurrentDataAndTime } = require("../utils/utils");
 
@@ -44,6 +44,8 @@ const verifyJwt = (req, res, next) => {
 const isHostAccessUrlEnabled = (req, res, next) => {
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
+  let adminId = hostAccessUrl.split("/")[3];
+  
   if (hostId) {
     const requestId = Math.round(new Date().getTime()/1000)
     host_users_schema.findOne({ hostId: hostId }, (err, data) => {
@@ -51,7 +53,7 @@ const isHostAccessUrlEnabled = (req, res, next) => {
         if (data.hostAcessUrl.status) next();
         else {
           // Add request in request history.
-        addRequestInRequestHistory(
+        addRequestInDeniedRequestHistory(
             requestId,
             secretKey,
             hostId,
@@ -64,7 +66,8 @@ const isHostAccessUrlEnabled = (req, res, next) => {
               statusMessage: "Host url is not enabled",
               statusCode: HOST_URL_IS_NOT_ENABLED,
             }),
-            false
+            false,
+            adminId
           ).then((data)=>{
             res.status(502).send({
               responseMessage: "Host url is not enabled",
@@ -101,6 +104,8 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
   console.log("isUserAllowedToUseTheUrl")
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
+  let adminId = hostAccessUrl.split("/")[3];
+  
   const requestId =   Math.round(new Date().getTime()/1000)
   
   developers_users_schema.findOne({ email: secretKey }, (err, data) => {
@@ -116,7 +121,7 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
         }
       });
       if (flag) {
-        addRequestInRequestHistory(
+        addRequestInDeniedRequestHistory(
           requestId,
           secretKey,
           hostId,
@@ -129,7 +134,8 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
             statusMessage: "You are not allowed to use this url",
             statusCode: NOT_ALLOWED_TO_USE_THIS_URL,
           }),
-          false
+          false,
+          adminId
         ).then((data)=>{
           console.log(data)
           res.status(502).send({
@@ -157,10 +163,14 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
 };
 //TODO:We need to create a middle ware for checking the query and assigned role.
 const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
+  
   const readOnlyOperators = ["select"];
   const writeOnlyOperators = ["delete", "drop", "update"];
+
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
+  let adminId = hostAccessUrl.split("/")[3];
+  
   try {
     let startingKeyWord = query.split(" ")[0];
     startingKeyWord = startingKeyWord.toLowerCase();
@@ -173,8 +183,12 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             //read only
             if (startingKeyWord == readOnlyOperators[0]) {
               next();
-            } else {
-              addRequestInRequestHistory(
+            } else if(
+              startingKeyWord == writeOnlyOperators[0] ||
+              startingKeyWord == writeOnlyOperators[1] ||
+              startingKeyWord == writeOnlyOperators[2]
+            ) {
+              addRequestInDeniedRequestHistory(
                 requestId,
                 secretKey,
                 hostId,
@@ -187,10 +201,36 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                   statusMessage: "You have the only read access role",
                   statusCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
                 }),
-                false
+                false,
+                adminId
               );
+
               res.status(502).send({
                 responseMessage: "You have the only read access role",
+                responseCode: ERROR_IN_MIDDLEWARE,
+              });
+
+            }else
+            {
+              addRequestInDeniedRequestHistory(
+                requestId,
+                secretKey,
+                hostId,
+                JSON.stringify({
+                  query,
+                  databaseName,
+                }),
+                getCurrentDataAndTime(),
+                JSON.stringify({
+                  statusMessage: "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                  statusCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
+                }),
+                false,
+                adminId
+              );
+              res.status(502).send({
+                responseMessage:
+                  "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
                 responseCode: ERROR_IN_MIDDLEWARE,
               });
             }
@@ -202,9 +242,11 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
               startingKeyWord == writeOnlyOperators[2]
             ) {
               next();
-            } else {
+            } else if (              
+              startingKeyWord == readOnlyOperators[0]
+            ){
 
-              addRequestInRequestHistory(
+              addRequestInDeniedRequestHistory(
                 requestId,
                 secretKey,
                 hostId,
@@ -217,11 +259,42 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                   statusMessage: "You have the only write access role",
                   statusCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
                 }),
-                false
+                false,
+                adminId
               );
 
               res.status(502).send({
                 responseMessage: "You have the only write access role",
+                responseCode: ERROR_IN_MIDDLEWARE,
+              });
+
+            }else{
+              
+              addRequestInDeniedRequestHistory(
+                requestId,
+                secretKey,
+                hostId,
+                JSON.stringify({
+                  query,
+                  databaseName,
+                }),
+                getCurrentDataAndTime(),
+                JSON.stringify({
+                  statusMessage: "You have the only write access role",
+                  statusCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
+                }),
+                false,
+                adminId
+              );
+
+              res.status(502).send({
+                responseMessage: "You have the only write access role",
+                responseCode: ERROR_IN_MIDDLEWARE,
+              });
+
+              res.status(502).send({
+                responseMessage:
+                  "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
                 responseCode: ERROR_IN_MIDDLEWARE,
               });
             }
@@ -235,7 +308,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             ) {
               next();
             } else {
-              addRequestInRequestHistory(
+              addRequestInDeniedRequestHistory(
                 requestId,
                 secretKey,
                 hostId,
@@ -248,7 +321,8 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                   statusMessage: "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
                   statusCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
                 }),
-                false
+                false,
+                adminId
               );
               res.status(502).send({
                 responseMessage:
