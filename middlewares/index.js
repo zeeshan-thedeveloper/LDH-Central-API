@@ -45,15 +45,15 @@ const isHostAccessUrlEnabled = (req, res, next) => {
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
   let adminId = hostAccessUrl.split("/")[3];
-  
+
   if (hostId) {
-    const requestId = Math.round(new Date().getTime()/1000)
+    const requestId = Math.round(new Date().getTime() / 1000);
     host_users_schema.findOne({ hostId: hostId }, (err, data) => {
       if (data) {
         if (data.hostAcessUrl.status) next();
         else {
           // Add request in request history.
-        addRequestInDeniedRequestHistory(
+          addRequestInDeniedRequestHistory(
             requestId,
             secretKey,
             hostId,
@@ -68,23 +68,24 @@ const isHostAccessUrlEnabled = (req, res, next) => {
             }),
             false,
             adminId
-          ).then((data)=>{
-            res.status(502).send({
-              responseMessage: "Host url is not enabled",
-              responseCode: HOST_URL_IS_NOT_ENABLED,
-            });
-          },(err)=>{
-            console.log(err)
-            res.status(502).send({
-              responseMessage: "Error while storing request in db",
-              responseCode: ERROR_IN_MIDDLEWARE,
-            });
-          })
-
+          ).then(
+            (data) => {
+              res.status(502).send({
+                responseMessage: "Host url is not enabled",
+                responseCode: HOST_URL_IS_NOT_ENABLED,
+              });
+            },
+            (err) => {
+              console.log(err);
+              res.status(502).send({
+                responseMessage: "Error while storing request in db",
+                responseCode: ERROR_IN_MIDDLEWARE,
+              });
+            }
+          );
         }
-
       } else {
-        console.log(data)
+        console.log(data);
         res.status(502).send({
           responseMessage: "Invalid host access url",
           responseCode: ERROR_IN_MIDDLEWARE,
@@ -101,17 +102,15 @@ const isHostAccessUrlEnabled = (req, res, next) => {
 
 //TODO:We need to create a middle ware for checking if the targeted host is allowed to use or not.
 const isUserAllowedToUseTheUrl = (req, res, next) => {
-  console.log("isUserAllowedToUseTheUrl")
+  console.log("isUserAllowedToUseTheUrl");
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
   let adminId = hostAccessUrl.split("/")[3];
-  
-  const requestId =   Math.round(new Date().getTime()/1000)
-  
+
+  const requestId = Math.round(new Date().getTime() / 1000);
+
   developers_users_schema.findOne({ email: secretKey }, (err, data) => {
- 
     if (data) {
-      
       let flag = true;
       data.allowedHostAccessUrls.forEach((element) => {
         if (element.listOfDatabases.includes(hostId)) {
@@ -136,21 +135,22 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
           }),
           false,
           adminId
-        ).then((data)=>{
-          console.log(data)
-          res.status(502).send({
-            responseMessage: "You are not allowed to use this url",
-            responseCode: ERROR_IN_MIDDLEWARE,
-          });
-        },(err)=>{
-          console.log(err)
-          res.status(502).send({
-            responseMessage: "Error while storing request in db",
-            responseCode: ERROR_IN_MIDDLEWARE,
-          });
-        })
-
-      
+        ).then(
+          (data) => {
+            console.log(data);
+            res.status(502).send({
+              responseMessage: "You are not allowed to use this url",
+              responseCode: ERROR_IN_MIDDLEWARE,
+            });
+          },
+          (err) => {
+            console.log(err);
+            res.status(502).send({
+              responseMessage: "Error while storing request in db",
+              responseCode: ERROR_IN_MIDDLEWARE,
+            });
+          }
+        );
       }
     } else {
       res.status(502).send({
@@ -158,23 +158,21 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
         responseCode: ERROR_IN_MIDDLEWARE,
       });
     }
-    
   });
 };
 //TODO:We need to create a middle ware for checking the query and assigned role.
 const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
-  
   const readOnlyOperators = ["select"];
   const writeOnlyOperators = ["delete", "drop", "update"];
 
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
   let adminId = hostAccessUrl.split("/")[3];
-  
+
   try {
     let startingKeyWord = query.split(" ")[0];
     startingKeyWord = startingKeyWord.toLowerCase();
-    const requestId =  Math.round(new Date().getTime()/1000)
+    const requestId = Math.round(new Date().getTime() / 1000);
     developers_users_schema.findOne({ email: secretKey }, async (err, data) => {
       if (data) {
         let flag = true;
@@ -183,7 +181,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             //read only
             if (startingKeyWord == readOnlyOperators[0]) {
               next();
-            } else if(
+            } else if (
               startingKeyWord == writeOnlyOperators[0] ||
               startingKeyWord == writeOnlyOperators[1] ||
               startingKeyWord == writeOnlyOperators[2]
@@ -203,15 +201,22 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }),
                 false,
                 adminId
+              ).then(
+                (data) => {
+                  res.status(502).send({
+                    responseMessage: "You have the only read access role",
+                    responseCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
+                  });
+                },
+                (error) => {
+                  console.log(error);
+                  res.status(502).send({
+                    responseMessage: "Error while storing request",
+                    responseCode: ERROR_IN_MIDDLEWARE,
+                  });
+                }
               );
-
-              res.status(502).send({
-                responseMessage: "You have the only read access role",
-                responseCode: ERROR_IN_MIDDLEWARE,
-              });
-
-            }else
-            {
+            } else {
               addRequestInDeniedRequestHistory(
                 requestId,
                 secretKey,
@@ -222,17 +227,28 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }),
                 getCurrentDataAndTime(),
                 JSON.stringify({
-                  statusMessage: "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                  statusMessage:
+                    "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
                   statusCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
                 }),
                 false,
                 adminId
+              ).then(
+                (data) => {
+                  res.status(502).send({
+                    responseMessage:
+                      "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                    responseCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
+                  });
+                },
+                (error) => {
+                  console.log(error);
+                  res.status(502).send({
+                    responseMessage: "Error while storing value in database",
+                    responseCode: ERROR_IN_MIDDLEWARE,
+                  });
+                }
               );
-              res.status(502).send({
-                responseMessage:
-                  "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
-                responseCode: ERROR_IN_MIDDLEWARE,
-              });
             }
           } else if (element.accessRole == "1202") {
             //write only
@@ -242,10 +258,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
               startingKeyWord == writeOnlyOperators[2]
             ) {
               next();
-            } else if (              
-              startingKeyWord == readOnlyOperators[0]
-            ){
-
+            } else if (startingKeyWord == readOnlyOperators[0]) {
               addRequestInDeniedRequestHistory(
                 requestId,
                 secretKey,
@@ -261,15 +274,22 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }),
                 false,
                 adminId
+              ).then(
+                (data) => {
+                  res.status(502).send({
+                    responseMessage: "You have the only write access role",
+                    responseCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
+                  });
+                },
+                (error) => {
+                  console.log(error);
+                  res.status(502).send({
+                    responseMessage: "Error while storing data in db",
+                    responseCode: ERROR_IN_MIDDLEWARE,
+                  });
+                }
               );
-
-              res.status(502).send({
-                responseMessage: "You have the only write access role",
-                responseCode: ERROR_IN_MIDDLEWARE,
-              });
-
-            }else{
-              
+            } else {
               addRequestInDeniedRequestHistory(
                 requestId,
                 secretKey,
@@ -285,18 +305,26 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }),
                 false,
                 adminId
+              ).then(
+                (data) => {
+                  res.status(502).send({
+                    responseMessage: "You have the only write access role",
+                    responseCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
+                  });
+                },
+                (error) => {
+                  res.status(502).send({
+                    responseMessage: "Error while storing data in db",
+                    responseCode: ERROR_IN_MIDDLEWARE,
+                  });
+                }
               );
 
-              res.status(502).send({
-                responseMessage: "You have the only write access role",
-                responseCode: ERROR_IN_MIDDLEWARE,
-              });
-
-              res.status(502).send({
-                responseMessage:
-                  "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
-                responseCode: ERROR_IN_MIDDLEWARE,
-              });
+              // res.status(502).send({
+              //   responseMessage:
+              //     "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+              //   responseCode: ERROR_IN_MIDDLEWARE,
+              // });
             }
           } else if (element.accessRole == "1203") {
             //read write only
@@ -318,17 +346,28 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }),
                 getCurrentDataAndTime(),
                 JSON.stringify({
-                  statusMessage: "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                  statusMessage:
+                    "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
                   statusCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
                 }),
                 false,
                 adminId
+              ).then(
+                (data) => {
+                  res.status(502).send({
+                    responseMessage:
+                      "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                    responseCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
+                  });
+                },
+                (error) => {
+                  console.log(error);
+                  res.status(502).send({
+                    responseMessage: "Error while storing data in db",
+                    responseCode: ERROR_IN_MIDDLEWARE,
+                  });
+                }
               );
-              res.status(502).send({
-                responseMessage:
-                  "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
-                responseCode: ERROR_IN_MIDDLEWARE,
-              });
             }
           } else {
             res.status(502).send({
@@ -360,6 +399,22 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
     });
   }
 };
+
+// const storeToDeniedRequest=( requestId,secretKey,hostId,payload,statusMessage,statusCode,adminId)=>{
+//   addRequestInDeniedRequestHistory(
+//     requestId,
+//     secretKey,
+//     hostId,
+//     payload,
+//     getCurrentDataAndTime(),
+//     JSON.stringify({
+//       statusMessage: statusMessage,
+//       statusCode: statusCode,
+//     }),
+//     false,
+//     adminId
+//   );
+// }
 module.exports = {
   verifyJwt,
   isHostAccessUrlEnabled,
