@@ -64,7 +64,7 @@ const addOrUpdate_host_info_list_cache=(hostId,hostDeviceId,lastSeenDateAndTime)
     return list;
 }
 
-const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,query,database,response) => {
+const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,query,database,response,secretKey,adminId) => {
     let  list = developers_host_access_url_request_list_cache.get("developers_host_access_url_request_list_cache") 
     let flag=false;
     /*
@@ -75,6 +75,8 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
        
         database:"",
         response:"",
+        secretKey:"",
+        adminId:""
     }
      */
 
@@ -88,6 +90,8 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
                 element.query=query,
                 element.database=database,
                 element.response=response,
+                element.secretKey=secretKey
+                element.adminId=adminId
                 flag=true;
                 console.log("Request updated  : ",requestId)
                 return element;
@@ -103,6 +107,8 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
            query:query,
            database:database,
            response:response,
+           secretKey:secretKey,
+           adminId:adminId
         });
         console.log("Request new added  : ",requestId)
     }
@@ -113,7 +119,7 @@ const addUpdate_developers_host_access_url_request_list_cache=(hostId,requestId,
     return list;
 }
 
-const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,connectionStatus,socketId) => {
+const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,connectionStatus,socketId,secretKey,adminId) => {
     let  list = available_and_connected_host_list_cache.get("available_and_connected_host_list_cache") 
     let flag=false;
     /*
@@ -131,6 +137,8 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
                     element.hostDeviceId= hostDeviceId,
                     element.connectionStatus=connectionStatus
                     element.socketId=socketId
+                    element.secretKey=secretKey
+                    element.adminId=adminId
                     console.log("host status updated",hostId)
                     flag=true;
                     return element;
@@ -143,7 +151,9 @@ const addUpdate_available_and_connected_host_list_cache=(hostId,hostDeviceId,con
                hostId:hostId,
                hostDeviceId: hostDeviceId,
                connectionStatus:connectionStatus,
-               socketId:socketId
+               socketId:socketId,
+               secretKey:secretKey,
+               adminId:adminId
             });
             console.log("new host is available and connected")
         }

@@ -70,6 +70,10 @@ const {
   hosts_info_list_cache,
   available_and_connected_host_list_cache,
 } = require("./cache-store/cache");
+const {
+  addRequestInResolvedRequestHistory,
+} = require("./request-manager/request-manager");
+const { getCurrentDataAndTime } = require("./utils/utils");
 
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
@@ -152,7 +156,7 @@ websocketListener.on("connection", (socket) => {
   global.globalSocket = socket;
   socket.on("joining", function (hostId, hostDeviceId, payload) {
     console.log("MSG", hostId, " saying ", hostDeviceId);
-    
+
     addUpdate_available_and_connected_host_list_cache(
       hostId,
       hostDeviceId,
@@ -160,41 +164,67 @@ websocketListener.on("connection", (socket) => {
     );
 
     if (payload != null) {
-      const { requestId, query, databaseName, response } = JSON.parse(payload);
+      const { requestId, query, databaseName, response, secretKey,adminId } =
+        JSON.parse(payload);
       addUpdate_developers_host_access_url_request_list_cache(
         hostId,
         requestId,
         query,
         databaseName,
-        response
+        response,
+        secretKey,
+        adminId
+      );
+
+      addRequestInResolvedRequestHistory(
+        requestId,
+        secretKey,
+        hostId,
+        JSON.stringify({
+          query,
+          databaseName,
+        }),
+        getCurrentDataAndTime(),
+        JSON.stringify({ response: response }),
+        adminId
       );
     }
   });
 
   socket.on("resolvingMySQL", (payload) => {
-    const { requestId, hostId, query, databaseName, response, hostDeviceId } =
-    JSON.parse(payload);
+    const {
+      requestId,
+      hostId,
+      query,
+      databaseName,
+      response,
+      hostDeviceId,
+      secretKey,
+      adminId
+    } = JSON.parse(payload);
     console.log("Data received from host is : ", JSON.parse(payload));
-    console.log("Current socket id for joining host",socket.id)
-
+    console.log("Current socket id for joining host", socket.id);
+    console.log("Current secret ket for which query is resolved", secretKey);
     addUpdate_developers_host_access_url_request_list_cache(
       hostId,
       requestId,
       query,
       databaseName,
-      response
+      response,
+      secretKey,
+      adminId
     );
-    
+
     //TODO: store resolved queries in db
 
     addUpdate_available_and_connected_host_list_cache(
       hostId,
       hostDeviceId,
       "connected",
-      socket.id
+      socket.id,
+      secretKey,
+      adminId
     );
-
-
   });
 
   socket.on("disconnect", (reason) => {
@@ -203,7 +233,7 @@ websocketListener.on("connection", (socket) => {
       socket.connect();
     }
     console.log("on disconnect", reason);
-    console.log("Disconnected host is ",socket.id)
+    console.log("Disconnected host is ", socket.id);
     removeItemFrom_available_and_connected_host_list_cache(socket.id);
   });
 });

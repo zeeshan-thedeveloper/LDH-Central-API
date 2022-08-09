@@ -49,18 +49,20 @@ const executeMysqlQuery=async (req, res)=>{
       // and we need to create a request manager to handle the remote requests and responses
       console.log("Recieved body from developer : ",req.body)
       let hostId = hostAccessUrl.split("/")[2]; 
+      let adminId = hostAccessUrl.split("/")[3]; 
+      
       // let hostDeviceId = await get_host_info_list_cache(hostId);
       //check if host is currently available on line or not?
       //if not available then make notification request.
       const requestId = uuidv1(); 
  
-      checkIfHostIsConnectedAndOnline(hostId,query,databaseName,requestId).then(async (response)=>{
+      checkIfHostIsConnectedAndOnline(hostId,query,databaseName,requestId,secretKey,adminId).then(async (response)=>{
         if(response){
           // available online
           if(response){
             // its available or notified.
             //so now lets send the query to the host.
-            sendMySQLQueryToHost(query,databaseName,hostId,requestId);
+            sendMySQLQueryToHost(query,databaseName,hostId,requestId,secretKey,adminId);
             console.log("Notified and sent the request with request id ",requestId);
             // Now look for request .. if that is resolved or not.
             const response = await checkForMYSQLRequestStatus(requestId);
