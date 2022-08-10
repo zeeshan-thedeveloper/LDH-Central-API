@@ -12,6 +12,7 @@ const {
   decrypt,
 } = require("../encryptionAndDecryption/encryptionAndDecryption");
 var emiter = require("../events-engine/Emiters");
+const { v1: uuidv1, v4: uuidv4 } = require("uuid");
 var events = require("../events-engine/Events");
 const {
   getItem_admin_accounts_cache,
@@ -27,6 +28,8 @@ const {
   COULD_NOT_FETCH,
   FETCHED,
   ACCONT_CREATED,
+  DATA_UPDATED,
+  DATA_NOT_UPDATED,
 } = require("./responses/responses");
 const {
   generateTokenWithId,
@@ -155,7 +158,7 @@ const createAdminAccount = async (req, res) => {
 
 const getListOfAdminAccounts = (req, res) => {
   const { hostId } = req.body;
-  console.log("here is host id "+hostId)
+  console.log("here is host id " + hostId);
   admin_users_schema.find({}, (err, data) => {
     if (err) {
       res.status(200).send({
@@ -179,9 +182,9 @@ const getListOfAdminAccounts = (req, res) => {
           const promises = admin.connectedHostList.map(fetchTheCompleteHost);
           const results = Promise.all(promises);
           results.then((resolvedData) => {
-           let listOfConnectedHosts =  resolvedData.map((host)=>{
-              if(host.hostId==hostId) return host
-            })
+            let listOfConnectedHosts = resolvedData.map((host) => {
+              if (host.hostId == hostId) return host;
+            });
             const recordToReturn = {
               id: admin._id,
               firstName: admin.firstName,
@@ -278,6 +281,30 @@ const getJWTToken = (req, res) => {
   });
 };
 
+const generateAndUpdateAPIKey = async (req, res) => {
+  const { email } = req.body;
+  const apiKey = uuidv1();
+  const record = await developers_users_schema.findOneAndUpdate(
+    { email: email },
+    { apiKey: apiKey },
+    { new: true }
+  );
+  if (record) {
+    console.log(record)
+    res.status(200).send({
+      responseMessage: "Updated the apiKey successfully",
+      responseCode: DATA_UPDATED,
+      responsePayload: apiKey,
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not update the apiKey",
+      responseCode: DATA_NOT_UPDATED,
+      responsePayload: null,
+    });
+  }
+};
+
 // tester end-points
 
 const test = (req, res) => {
@@ -296,4 +323,5 @@ module.exports = {
   verifyJWTToken,
   getJWTToken,
   test,
+  generateAndUpdateAPIKey,
 };

@@ -42,7 +42,8 @@ const admin_user = new mongoose.Schema({
     githubAccountData:{
         type:Object,
         required: false,
-    }
+    },
+   
 });
 
 const admin_users_schema = mongoose.model("admin_users_schema", admin_user);

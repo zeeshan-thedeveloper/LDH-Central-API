@@ -103,6 +103,7 @@ const removeRemoteDatabaseQuery=(req,res)=>{
   })
 }
 
+
 const executeRemoteDatabaseQuery=(req,res)=>{
     res.status(200).send({
         responseMessage:"Loaded all remote database access urls"

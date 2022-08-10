@@ -36,6 +36,11 @@ const developer_user = new mongoose.Schema({
     githubAccountData:{
         type:Object,
         required: false,
+    },
+    apiKey:{
+        type:String,
+        required:false,
+        default:"Generate an api key"
     }
 });
 
