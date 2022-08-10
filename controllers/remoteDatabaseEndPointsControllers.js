@@ -2,7 +2,7 @@ const {
   remote_database_endpoints_schema,
 } = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
 
-const { DATA_STORED, DATA_NOT_STORED, FETCHED, COULD_NOT_FETCH } = require("./responses/responses");
+const { DATA_STORED, DATA_NOT_STORED, FETCHED, COULD_NOT_FETCH, DATA_NOT_UPDATED, DATA_UPDATED, DELETED, COULD_NOT_DELETE } = require("./responses/responses");
 
 const createRemoteDatabaseEndpoint = (req, res) => {
   const { hostAccessUrl, query, databaseName, description, url,hostName } = req.body;
@@ -28,7 +28,6 @@ const createRemoteDatabaseEndpoint = (req, res) => {
   },(err,data)=>{
     if(!err){
       
-        console.log(listOfUrls)
         res.status(200).send({
             responseMessage: "Successfully stored data in db",
             responseCode: DATA_NOT_STORED,
@@ -67,6 +66,43 @@ const getListOfRemoteDatabaseAccessUrlsByAdminId=(req,res)=>{
     })
 }
 
+const updateRemoteDbAccessUrlStatus=async (req,res)=>{
+  const {urlId,status}=req.body;
+  const record = await remote_database_endpoints_schema.findOneAndUpdate({urlId},{isEnabled:status},  { new: true });
+  if(record){
+    res.status(200).send({
+      responseMessage:"Updated the url status successfully",
+      responseCode:DATA_UPDATED,
+      responsePayload:record
+  })
+  }else{
+    res.status(200).send({
+      responseMessage:"Could not update the url status",
+      responseCode:DATA_NOT_UPDATED,
+      responsePayload:null
+  })
+  }
+}
+
+const removeRemoteDatabaseQuery=(req,res)=>{
+  const {urlId}=req.body;
+  remote_database_endpoints_schema.deleteOne({urlId:urlId},(err,data)=>{
+    if(!err){
+      res.status(200).send({
+          responseMessage:"Successfully deleted endpoint",
+          responseCode:DELETED,
+          responsePayload:data
+      })
+  }else{
+      res.status(200).send({
+          responseMessage:"Could not delete endpoint",
+          responseCode:COULD_NOT_DELETE,
+          responsePayload:err
+      })
+  }
+  })
+}
+
 const executeRemoteDatabaseQuery=(req,res)=>{
     res.status(200).send({
         responseMessage:"Loaded all remote database access urls"
@@ -76,5 +112,7 @@ const executeRemoteDatabaseQuery=(req,res)=>{
 module.exports = {
   createRemoteDatabaseEndpoint,
   executeRemoteDatabaseQuery,
-  getListOfRemoteDatabaseAccessUrlsByAdminId
+  getListOfRemoteDatabaseAccessUrlsByAdminId,
+  updateRemoteDbAccessUrlStatus,
+  removeRemoteDatabaseQuery
 };

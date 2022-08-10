@@ -27,6 +27,8 @@ webportal.post("/getHostsByAdminId",hostController.getHostsByAdminId);
 webportal.post("/testHostAccessUrl",middleware.verifyJwt,middleware.isHostAccessUrlEnabled,middleware.processAdminQuery,middleware.verifyAdminUserUid,hostAccessUrlController.executeMysqlQuery);
 webportal.post("/createRemoteDatabaseEndpoint",remoteDatabaseEndpointsController.createRemoteDatabaseEndpoint);
 webportal.post("/getListOfRemoteDatabaseAccessUrlsByAdminId",remoteDatabaseEndpointsController.getListOfRemoteDatabaseAccessUrlsByAdminId);
+webportal.post("/updateRemoteDbAccessUrlStatus",remoteDatabaseEndpointsController.updateRemoteDbAccessUrlStatus);
+webportal.post("/removeRemoteDatabaseQuery",remoteDatabaseEndpointsController.removeRemoteDatabaseQuery);
 
 module.exports = {
     webportal
