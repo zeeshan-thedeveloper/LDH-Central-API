@@ -3,6 +3,7 @@ const authController=require('../controllers/authenticationControllers')
 const hostAccessUrlController=require('../controllers/hostAccessEndPointsControllers')
 const hostController=require("../controllers/hostLayerControllers")
 const adminPortalControllers = require('../controllers/adminPortalControllers')
+const remoteDatabaseEndpointsController=require("../controllers/remoteDatabaseEndPointsControllers")
 const middleware = require("../middlewares/index");
 const webportal=express()
 
@@ -24,6 +25,8 @@ webportal.post("/getListOfDeniedRequestsByAdminId",adminPortalControllers.getLis
 webportal.post("/getListOfResolvedRequestsByAdminId",adminPortalControllers.getListOfResolvedRequestsByAdminId);
 webportal.post("/getHostsByAdminId",hostController.getHostsByAdminId);
 webportal.post("/testHostAccessUrl",middleware.verifyJwt,middleware.isHostAccessUrlEnabled,middleware.processAdminQuery,middleware.verifyAdminUserUid,hostAccessUrlController.executeMysqlQuery);
+webportal.post("/createRemoteDatabaseEndpoint",remoteDatabaseEndpointsController.createRemoteDatabaseEndpoint);
+webportal.post("/getListOfRemoteDatabaseAccessUrlsByAdminId",remoteDatabaseEndpointsController.getListOfRemoteDatabaseAccessUrlsByAdminId);
 
 module.exports = {
     webportal
