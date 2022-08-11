@@ -12,7 +12,7 @@ const createRemoteDatabaseEndpoint = (req, res) => {
   // <Host>/executeRemoteDatabaseQuery/<REQUEST_ID>/<URL>/?apiKey=""
   const urlId = Math.round(new Date().getTime() / 1000);
 //   const endpointUrl = `${centralApiServerUrl}/executeRemoteDatabaseQuery/${urlId}/${url}/?yourApikey=`;
-     const endpointUrl = `/executeRemoteDatabaseQuery/${urlId}/${url}/?yourApikey=`;
+     const endpointUrl = `/executeRemoteDatabaseQuery/${urlId}/${url}?yourApikey=`;
 
   remote_database_endpoints_schema.create({
     urlId:urlId,
@@ -105,9 +105,9 @@ const removeRemoteDatabaseQuery=(req,res)=>{
 
 
 const executeRemoteDatabaseQuery=(req,res)=>{
-    res.status(200).send({
-        responseMessage:"Loaded all remote database access urls"
-    })
+  res.send({
+    req:req.body
+  })
 }
 
 module.exports = {

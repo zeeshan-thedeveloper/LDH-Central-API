@@ -4,6 +4,8 @@ const {
   NOT_ALLOWED_TO_USE_THIS_URL,
   INVALID_OPERATION_KEY_WORDS_IN_QUERY,
   UN_AUTHORIZED_TO_PERFORM_OPERATION,
+  FETCHED,
+  COULD_NOT_FETCH,
 } = require("../controllers/responses/responses");
 const {
   developers_users_schema,
@@ -19,6 +21,7 @@ const {
 const { getCurrentDataAndTime } = require("../utils/utils");
 const { admin_users_schema } = require("../mongodb/schemas/admin-schemas/admin-users");
 const { decrypt } = require("../encryptionAndDecryption/encryptionAndDecryption");
+const { remote_database_endpoints_schema } = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
 
 const verifyJwt = (req, res, next) => {
   const authToken = req.headers.authorization.split(" ")[1];
@@ -473,11 +476,74 @@ const processAdminQuery=(req,res,next)=>{
   }
 }
 
+const isRemoteDatabaseAccessUrlEnabled=(req,res,next)=>{
+  const urlId = req.params.urlId;
+  if(urlId){
+    remote_database_endpoints_schema.findOne({urlId:urlId},(err,data)=>{
+      if(data){
+        if(data.isEnabled=="true"){
+          next();
+        }else{
+          res.status(502).send({
+            responseMessage:
+              "Url is not enabled",
+            responseCode: COULD_NOT_FETCH,
+            responsePayload:null
+          });   
+        }
+      }else{
+        res.status(502).send({
+          responseMessage:
+            "Could not fetch any remote db access url with such url id",
+          responseCode: COULD_NOT_FETCH,
+          responsePayload:err
+        });
+      }
+    })
+  }else{
+    res.status(502).send({
+      responseMessage: "Please provide a url ID",
+      responseCode: ERROR_IN_MIDDLEWARE,
+    });
+  }
+}
+
+const isApiKeyValid=(req,res,next)=>{
+  const apiKey = req.query.yourApikey
+  const urlId = req.params.urlId;
+  if(apiKey.length>0){
+    developers_users_schema.findOne({apiKey:apiKey}, async(err,userSendingRequest)=>{
+      if(userSendingRequest){ 
+        const urlDetails = await remote_database_endpoints_schema.findOne({urlId:urlId});
+        // secretKey, hostAccessUrl, query, databaseName
+        req.body.secretKey=userSendingRequest.email
+        req.body.hostAccessUrl=urlDetails.hostUrl
+        req.body.query=urlDetails.urlQuery
+        req.body.databaseName=urlDetails.urlDatabaseName
+        next()
+      }else{
+        res.status(502).send({
+          responseMessage:
+            "Not a valid api key",
+          responseCode: COULD_NOT_FETCH,
+          responsePayload:null
+        });  
+      }
+    })
+  }else{
+    res.status(502).send({
+      responseMessage: "Please provide a api key",
+      responseCode: ERROR_IN_MIDDLEWARE,
+    });
+  }
+}
 module.exports = {
   verifyJwt,
   isHostAccessUrlEnabled,
   isUserAllowedToUseTheUrl,
   isUserAllowedToPerformRequestedQuery,
   verifyAdminUserUid,
-  processAdminQuery
+  processAdminQuery,
+  isRemoteDatabaseAccessUrlEnabled,
+  isApiKeyValid
 };

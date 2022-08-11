@@ -103,6 +103,7 @@ app.use("/host-accessUrl-api", webportal);
 app.use("/auth-api", desktopApp);
 app.use("/host-api", desktopApp);
 app.use("/consumer-api", consumer);
+app.use("/", consumer);
 
 // Google authentication
 app.get(

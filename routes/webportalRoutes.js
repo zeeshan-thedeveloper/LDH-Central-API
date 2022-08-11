@@ -4,7 +4,9 @@ const hostAccessUrlController=require('../controllers/hostAccessEndPointsControl
 const hostController=require("../controllers/hostLayerControllers")
 const adminPortalControllers = require('../controllers/adminPortalControllers')
 const remoteDatabaseEndpointsController=require("../controllers/remoteDatabaseEndPointsControllers")
+const paymentController = require("../controllers/paymentController");
 const middleware = require("../middlewares/index");
+
 const webportal=express()
 
 // Auth router
@@ -29,6 +31,7 @@ webportal.post("/createRemoteDatabaseEndpoint",remoteDatabaseEndpointsController
 webportal.post("/getListOfRemoteDatabaseAccessUrlsByAdminId",remoteDatabaseEndpointsController.getListOfRemoteDatabaseAccessUrlsByAdminId);
 webportal.post("/updateRemoteDbAccessUrlStatus",remoteDatabaseEndpointsController.updateRemoteDbAccessUrlStatus);
 webportal.post("/removeRemoteDatabaseQuery",remoteDatabaseEndpointsController.removeRemoteDatabaseQuery);
+webportal.post("/makePayment",paymentController.makePayment);
 
 module.exports = {
     webportal
