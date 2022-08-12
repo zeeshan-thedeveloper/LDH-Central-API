@@ -5,6 +5,7 @@ const hostController=require("../controllers/hostLayerControllers")
 const adminPortalControllers = require('../controllers/adminPortalControllers')
 const remoteDatabaseEndpointsController=require("../controllers/remoteDatabaseEndPointsControllers")
 const paymentController = require("../controllers/paymentController");
+const remoteDatabaseAccessUrl = require("../controllers/remoteDatabaseEndPointsControllers")
 const middleware = require("../middlewares/index");
 
 const webportal=express()
@@ -32,6 +33,7 @@ webportal.post("/getListOfRemoteDatabaseAccessUrlsByAdminId",remoteDatabaseEndpo
 webportal.post("/updateRemoteDbAccessUrlStatus",remoteDatabaseEndpointsController.updateRemoteDbAccessUrlStatus);
 webportal.post("/removeRemoteDatabaseQuery",remoteDatabaseEndpointsController.removeRemoteDatabaseQuery);
 webportal.post("/makePayment",paymentController.makePayment);
+webportal.post("/updateRemoteDbAccessUrlVisibility",remoteDatabaseAccessUrl.updateRemoteDbAccessUrlVisibility);
 
 module.exports = {
     webportal

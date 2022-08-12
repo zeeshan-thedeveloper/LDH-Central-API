@@ -45,6 +45,12 @@ const host_user = new mongoose.Schema({
         required: false,
         default:false
     },
+    isPublic: {
+        type:Boolean,
+        required: false,
+        default:false
+    },
+
     numberOfHits:{
         type:Number,
         required:false,
