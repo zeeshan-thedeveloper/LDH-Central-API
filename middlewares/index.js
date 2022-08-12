@@ -522,7 +522,7 @@ const isApiKeyValid = (req, res, next) => {
             urlId: urlId,
           });
           // secretKey, hostAccessUrl, query, databaseName
-          req.body.secretKey = userSendingRequest.email;
+          req.body.secretKey = developerSendingRequest.email;
           req.body.hostAccessUrl = urlDetails.hostUrl;
           req.body.query = urlDetails.urlQuery;
           req.body.databaseName = urlDetails.urlDatabaseName;

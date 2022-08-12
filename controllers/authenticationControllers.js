@@ -78,9 +78,13 @@ const onGithubAuthSucess = (req, res) => {
   // when Github authentication is successful
   console.log("Github-Auth-success", req.user);
   // res.send("Github authentication is successful");
+  req.user.id=req.user.nodeId
+  console.log("git user",req.user)
+  emiter.emit(events.ADD_ITEM_admin_account_cache, req.user);
   const user_Id = encrypt(req.user.nodeId);
+
   res.redirect(
-    `${FRONT_END_BASE_URL}/Authentication/SignIn?user_Id=${
+    `${FRONT_END_BASE_URL}/Authentication/SignIn?id=${
       user_Id != undefined ? user_Id : ""
     }&authType=github`
   );
@@ -100,7 +104,6 @@ const createAdminAccount = async (req, res) => {
     if (id) {
       // If decryption is successful
       let user = getItem_admin_accounts_cache(id);
-      // console.log("Stored user",user)
       const jwtToken = generateTokenWithId({ key: user.email }, expires_in);
       const userUid = encrypt(user.id);
       const apiKey = uuidv1();
@@ -134,6 +137,7 @@ const createAdminAccount = async (req, res) => {
         // if already account does not exist
         schema.create(data, (error, insertedData) => {
           if (!error) {
+
             console.log("insertedData", insertedData);
             res.status(200).send({
               responseMessage: "Account created successfully",
@@ -151,9 +155,68 @@ const createAdminAccount = async (req, res) => {
       }
     } else {
       // if decryption is not successful
-      res.status(501).send({ responseMessage: "Invaid user id" });
+      res.status(501).send({ responseMessage: "Invalid user id" });
     }
   } else if (authType == "github") {
+    console.log("Creating account with github")
+    const id = decrypt(user_Id);
+    
+    if (id) {
+      let user = getItem_admin_accounts_cache(id);
+      
+      const jwtToken = generateTokenWithId({ key: user.username }, expires_in);
+      const userUid = encrypt(user.id);
+      const apiKey = uuidv1();
+     
+      data = {
+        firstName: user.displayName,
+        lastName: user.displayName,
+        email: user.username,
+        profilePhotoUrl: user.profileUrl,
+        userUid: userUid,
+        jwtToken: jwtToken,
+        googleAccountData: null,
+        githubAccountData: JSON.stringify(user),
+        apiKey:apiKey
+      };
+
+      let schema =
+        accountType == "admin" ? admin_users_schema : developers_users_schema;
+      // lets check if account exists or not.
+      const record = await schema.findOneAndUpdate(
+        { email: data.email },
+        { jwtToken: jwtToken },
+        { new: true }
+      );
+      if (record) {
+        res.status(200).send({
+          responseMessage: "Account already exists",
+          responseCode: ALREADY_CREATED_ACCOUNT,
+          responsePayload: record,
+        });
+      } else {
+        // if already account does not exist
+        schema.create(data, (error, insertedData) => {
+          if (!error) {
+            console.log("insertedData", insertedData);
+            res.status(200).send({
+              responseMessage: "Account created successfully",
+              responseCode: ACCONT_CREATED,
+              responsePayload: insertedData,
+            });
+          } else {
+            res.status(200).send({
+              responseMessage: "Could not create account",
+              responseCode: COULD_NOT_CREATE_ACCOUNT,
+              responsePayload: error,
+            });
+          }
+        });
+      }
+
+    }else{
+      res.status(501).send({ responseMessage: "Invalid user id" });     
+    }
   } else if (authType == "userName&Password") {
   }
 };
