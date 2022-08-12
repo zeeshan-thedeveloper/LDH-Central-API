@@ -16,7 +16,6 @@ consumer.post("/executeMysqlQuery/*",middleware.verifyJwt,middleware.isHostAcces
 consumer.post("/generateAndUpdateAPIKey",authController.generateAndUpdateAPIKey);
 consumer.get("/executeRemoteDatabaseQuery/:urlId/:urlEnd",middleware.isRemoteDatabaseAccessUrlEnabled,middleware.isApiKeyValid,middleware.processAdminQuery,hostAccessUrlController.executeMysqlQuery);
 consumer.post("/getListOfAllRemoteDatabaseEndpointsByDeveloperId",remoteDatabaseAccessUrl.getListOfAllRemoteDatabaseEndpointsByDeveloperIdId);
-consumer.post("/updateRemoteDbAccessUrlVisibility",remoteDatabaseAccessUrl.updateRemoteDbAccessUrlVisibility);
 
 module.exports = {
     consumer

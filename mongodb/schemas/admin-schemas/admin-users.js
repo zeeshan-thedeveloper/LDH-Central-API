@@ -43,7 +43,11 @@ const admin_user = new mongoose.Schema({
         type:Object,
         required: false,
     },
-   
+    apiKey:{
+        type:String,
+        required:false,
+        default:"Generate an api key"
+    }
 });
 
 const admin_users_schema = mongoose.model("admin_users_schema", admin_user);

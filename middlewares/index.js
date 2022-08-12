@@ -19,9 +19,15 @@ const {
   addRequestInDeniedRequestHistory,
 } = require("../request-manager/request-manager");
 const { getCurrentDataAndTime } = require("../utils/utils");
-const { admin_users_schema } = require("../mongodb/schemas/admin-schemas/admin-users");
-const { decrypt } = require("../encryptionAndDecryption/encryptionAndDecryption");
-const { remote_database_endpoints_schema } = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
+const {
+  admin_users_schema,
+} = require("../mongodb/schemas/admin-schemas/admin-users");
+const {
+  decrypt,
+} = require("../encryptionAndDecryption/encryptionAndDecryption");
+const {
+  remote_database_endpoints_schema,
+} = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
 
 const verifyJwt = (req, res, next) => {
   const authToken = req.headers.authorization.split(" ")[1];
@@ -45,34 +51,34 @@ const verifyJwt = (req, res, next) => {
   }
 };
 
-const verifyAdminUserUid=(req,res,next)=>{
+const verifyAdminUserUid = (req, res, next) => {
+  console.log(req.body);
+  const { userUid, secretKey } = req.body;
 
-    console.log(req.body)
-    const {userUid,secretKey}=req.body;
-    
-    const decryptedUserUid = decrypt(userUid);
-    admin_users_schema.findOne({email:secretKey},(err,data)=>{
-      if(!err){
-          const storedUserUid = decrypt(data.userUid);
-          if(decryptedUserUid==storedUserUid){
-            next();
-          }else{
-            res.status(501).send({
-              responseMessage:"Could not verify the user uid",
-              responseCode:ERROR_IN_MIDDLEWARE,
-              responsePayload:null
-            })
-          }
-      }else{
-        console.log(err)
-        res.status(200).send({
-          responseMessage:"Error while fetching the admin user in middleware : verifyAdminUserUid ",
-          responseCode:ERROR_IN_MIDDLEWARE,
-          responsePayload:err
-        })
+  const decryptedUserUid = decrypt(userUid);
+  admin_users_schema.findOne({ email: secretKey }, (err, data) => {
+    if (!err) {
+      const storedUserUid = decrypt(data.userUid);
+      if (decryptedUserUid == storedUserUid) {
+        next();
+      } else {
+        res.status(501).send({
+          responseMessage: "Could not verify the user uid",
+          responseCode: ERROR_IN_MIDDLEWARE,
+          responsePayload: null,
+        });
       }
-    })
-}
+    } else {
+      console.log(err);
+      res.status(200).send({
+        responseMessage:
+          "Error while fetching the admin user in middleware : verifyAdminUserUid ",
+        responseCode: ERROR_IN_MIDDLEWARE,
+        responsePayload: err,
+      });
+    }
+  });
+};
 
 const isHostAccessUrlEnabled = (req, res, next) => {
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
@@ -351,8 +357,6 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                   });
                 }
               );
-
-          
             }
           } else if (element.accessRole == "1203") {
             //read write only
@@ -404,7 +408,6 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             });
           }
         });
-    
       } else {
         res.status(502).send({
           responseMessage: "Invalid secret key",
@@ -423,7 +426,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
   }
 };
 
-const processAdminQuery=(req,res,next)=>{
+const processAdminQuery = (req, res, next) => {
   const readOnlyOperators = ["select"];
   const writeOnlyOperators = ["delete", "drop", "update"];
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
@@ -432,7 +435,7 @@ const processAdminQuery=(req,res,next)=>{
   let startingKeyWord = query.split(" ")[0];
   startingKeyWord = startingKeyWord.toLowerCase();
   const requestId = Math.round(new Date().getTime() / 1000);
- 
+
   if (
     startingKeyWord == writeOnlyOperators[0] ||
     startingKeyWord == writeOnlyOperators[1] ||
@@ -474,69 +477,89 @@ const processAdminQuery=(req,res,next)=>{
       }
     );
   }
-}
+};
 
-const isRemoteDatabaseAccessUrlEnabled=(req,res,next)=>{
+const isRemoteDatabaseAccessUrlEnabled = (req, res, next) => {
   const urlId = req.params.urlId;
-  if(urlId){
-    remote_database_endpoints_schema.findOne({urlId:urlId},(err,data)=>{
-      if(data){
-        if(data.isEnabled=="true"){
+  if (urlId) {
+    remote_database_endpoints_schema.findOne({ urlId: urlId }, (err, data) => {
+      if (data) {
+        if (data.isEnabled == "true") {
           next();
-        }else{
+        } else {
           res.status(502).send({
-            responseMessage:
-              "Url is not enabled",
+            responseMessage: "Url is not enabled",
             responseCode: COULD_NOT_FETCH,
-            responsePayload:null
-          });   
+            responsePayload: null,
+          });
         }
-      }else{
+      } else {
         res.status(502).send({
           responseMessage:
             "Could not fetch any remote db access url with such url id",
           responseCode: COULD_NOT_FETCH,
-          responsePayload:err
+          responsePayload: err,
         });
       }
-    })
-  }else{
+    });
+  } else {
     res.status(502).send({
       responseMessage: "Please provide a url ID",
       responseCode: ERROR_IN_MIDDLEWARE,
     });
   }
-}
+};
 
-const isApiKeyValid=(req,res,next)=>{
-  const apiKey = req.query.yourApikey
+const isApiKeyValid = (req, res, next) => {
+  const apiKey = req.query.yourApikey;
   const urlId = req.params.urlId;
-  if(apiKey.length>0){
-    developers_users_schema.findOne({apiKey:apiKey}, async(err,userSendingRequest)=>{
-      if(userSendingRequest){ 
-        const urlDetails = await remote_database_endpoints_schema.findOne({urlId:urlId});
-        // secretKey, hostAccessUrl, query, databaseName
-        req.body.secretKey=userSendingRequest.email
-        req.body.hostAccessUrl=urlDetails.hostUrl
-        req.body.query=urlDetails.urlQuery
-        req.body.databaseName=urlDetails.urlDatabaseName
-        next()
-      }else{
-        res.status(502).send({
-          responseMessage:
-            "Not a valid api key",
-          responseCode: COULD_NOT_FETCH,
-          responsePayload:null
-        });  
+  if (apiKey.length > 0) {
+    developers_users_schema.findOne(
+      { apiKey: apiKey },
+      async (err, developerSendingRequest) => {
+        if (developerSendingRequest) {
+          const urlDetails = await remote_database_endpoints_schema.findOne({
+            urlId: urlId,
+          });
+          // secretKey, hostAccessUrl, query, databaseName
+          req.body.secretKey = userSendingRequest.email;
+          req.body.hostAccessUrl = urlDetails.hostUrl;
+          req.body.query = urlDetails.urlQuery;
+          req.body.databaseName = urlDetails.urlDatabaseName;
+          next();
+        } else {
+          admin_users_schema.findOne(
+            { apiKey: apiKey },
+            async (err, adminSendingRequest) => {
+              if (adminSendingRequest) {
+                const urlDetails = await remote_database_endpoints_schema.findOne({
+                  urlId: urlId,
+                });
+                // secretKey, hostAccessUrl, query, databaseName
+                req.body.secretKey = adminSendingRequest.email;
+                req.body.hostAccessUrl = urlDetails.hostUrl;
+                req.body.query = urlDetails.urlQuery;
+                req.body.databaseName = urlDetails.urlDatabaseName;
+                next();
+              } else {
+                res.status(502).send({
+                  responseMessage: "Not a valid api key",
+                  responseCode: COULD_NOT_FETCH,
+                  responsePayload: null,
+                });
+              }
+            }
+          );
+        }
       }
-    })
-  }else{
+    );
+  } else {
     res.status(502).send({
       responseMessage: "Please provide a api key",
       responseCode: ERROR_IN_MIDDLEWARE,
     });
   }
-}
+};
 module.exports = {
   verifyJwt,
   isHostAccessUrlEnabled,
@@ -545,5 +568,5 @@ module.exports = {
   verifyAdminUserUid,
   processAdminQuery,
   isRemoteDatabaseAccessUrlEnabled,
-  isApiKeyValid
+  isApiKeyValid,
 };

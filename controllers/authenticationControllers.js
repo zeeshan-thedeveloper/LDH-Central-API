@@ -103,6 +103,7 @@ const createAdminAccount = async (req, res) => {
       // console.log("Stored user",user)
       const jwtToken = generateTokenWithId({ key: user.email }, expires_in);
       const userUid = encrypt(user.id);
+      const apiKey = uuidv1();
       data = {
         firstName: user.given_name,
         lastName: user.family_name,
@@ -112,6 +113,7 @@ const createAdminAccount = async (req, res) => {
         jwtToken: jwtToken,
         googleAccountData: JSON.stringify(user),
         githubAccountData: null,
+        apiKey:apiKey
       };
       console.log(accountType);
       let schema =
