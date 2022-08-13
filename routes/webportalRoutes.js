@@ -38,6 +38,7 @@ webportal.post("/updateRemoteDbAccessUrlStatus",remoteDatabaseEndpointsControlle
 webportal.post("/removeRemoteDatabaseQuery",remoteDatabaseEndpointsController.removeRemoteDatabaseQuery);
 webportal.post("/makePayment",paymentController.makePayment);
 webportal.post("/updateRemoteDbAccessUrlVisibility",remoteDatabaseAccessUrl.updateRemoteDbAccessUrlVisibility);
+webportal.post("/terminateAllUrlByAdminId",authController.terminateAllUrlByAdminId);
 
 module.exports = {
     webportal

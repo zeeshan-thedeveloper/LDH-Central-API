@@ -29,7 +29,7 @@ const createRemoteDatabaseEndpoint = (req, res) => {
   const urlId = Math.round(new Date().getTime() / 1000);
   //   const endpointUrl = `${centralApiServerUrl}/executeRemoteDatabaseQuery/${urlId}/${url}/?yourApikey=`;
   const endpointUrl = `/executeRemoteDatabaseQuery/${urlId}/${url}?yourApikey=`;
-
+ 
   remote_database_endpoints_schema.create(
     {
       urlId: urlId,

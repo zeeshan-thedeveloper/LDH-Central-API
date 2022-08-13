@@ -47,6 +47,7 @@ const {
 const {
   dev_admin_con_schema,
 } = require("../mongodb/schemas/developer-and-admin-connection-schema/developer-and-admin-connection-schema");
+const { remote_database_endpoints_schema } = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
 
 const expires_in = "1h";
 
@@ -519,7 +520,6 @@ const deleteAccount = async (req, res) => {
       }
     } else {
       // need to delete only from central db
-
       const result1 = await schema.deleteOne({ _id: _id });
       let result2 = null;
       if (result1.acknowledged) {
@@ -718,6 +718,59 @@ const generateAndUpdateAPIKey = async (req, res) => {
   }
 };
 
+const terminateAllUrlByAdminId=(req,res)=>{
+  const {_id}=req.body;
+  admin_users_schema.findOne({_id:_id},(err,data)=>{
+    if(data){
+      const updateStatus=(host)=>{
+        return new Promise(async(resolve,reject)=>{
+        const record = await  host_users_schema.findOneAndUpdate({hostId:host.hostId},{
+            hostAcessUrl:{
+              status:false
+            },
+            connectedAdmin:_id
+          },{new:true})
+          resolve(record)
+        })
+       
+      }
+      const promises = data.connectedHostList.map(updateStatus);
+      const results = Promise.all(promises);
+      results.then(async(allValues)=>{
+        let allSetedFalse=true;
+        allValues.forEach((value)=>{
+          //TODO:Terminate the open apis.
+          if(!value){
+            allSetedFalse=false;
+          }
+        })
+
+        if(allSetedFalse){
+          const rec = await remote_database_endpoints_schema.update({ownerAdminId:_id},{isEnabled:false}, {multi: true})
+          
+          res.status(200).send({
+            responseMessage:"Update all urls",
+            responseCode:DATA_UPDATED,
+            responsePayload:rec
+          })
+        }else{
+          res.status(200).send({
+            responseMessage:"Could not update all urls",
+            responseCode:DATA_NOT_UPDATED,
+            responsePayload:true
+          })
+        }
+      })
+    }else{
+      res.status(200).send({
+        responseMessage:"No admin with this id exists",
+        responseCode:COULD_NOT_FETCH,
+        responsePayload:err
+      })
+    }
+  })
+}
+
 // tester end-points
 
 const test = (req, res) => {
@@ -740,4 +793,5 @@ module.exports = {
   loginToAccount,
   resetMyAccountPassword,
   deleteAccount,
+  terminateAllUrlByAdminId
 };
