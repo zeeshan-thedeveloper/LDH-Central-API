@@ -1,6 +1,6 @@
 const passport = require("passport");
 const { requestsListCache } = require("../cache-store/cache");
-const { firestore, admin } = require("../firebase-database/firebase-connector");
+const { firebase, admin } = require("../firebase-database/firebase-connector");
 const {
   admin_users_schema,
 } = require("../mongodb/schemas/admin-schemas/admin-users");
@@ -78,8 +78,8 @@ const onGithubAuthSucess = (req, res) => {
   // when Github authentication is successful
   console.log("Github-Auth-success", req.user);
   // res.send("Github authentication is successful");
-  req.user.id=req.user.nodeId
-  console.log("git user",req.user)
+  req.user.id = req.user.nodeId;
+  console.log("git user", req.user);
   emiter.emit(events.ADD_ITEM_admin_account_cache, req.user);
   const user_Id = encrypt(req.user.nodeId);
 
@@ -97,8 +97,8 @@ const onGithubAuthFailure = (req, res) => {
 };
 
 const createAdminAccount = async (req, res) => {
-  // console.log("Request Body : createAdminAccount :",req.body)
   const { authType, user_Id, accountType } = req.body;
+
   if (authType == "google") {
     const id = decrypt(user_Id);
     if (id) {
@@ -116,7 +116,7 @@ const createAdminAccount = async (req, res) => {
         jwtToken: jwtToken,
         googleAccountData: JSON.stringify(user),
         githubAccountData: null,
-        apiKey:apiKey
+        apiKey: apiKey,
       };
       console.log(accountType);
       let schema =
@@ -137,7 +137,6 @@ const createAdminAccount = async (req, res) => {
         // if already account does not exist
         schema.create(data, (error, insertedData) => {
           if (!error) {
-
             console.log("insertedData", insertedData);
             res.status(200).send({
               responseMessage: "Account created successfully",
@@ -158,16 +157,14 @@ const createAdminAccount = async (req, res) => {
       res.status(501).send({ responseMessage: "Invalid user id" });
     }
   } else if (authType == "github") {
-    console.log("Creating account with github")
     const id = decrypt(user_Id);
-    
     if (id) {
       let user = getItem_admin_accounts_cache(id);
-      
+
       const jwtToken = generateTokenWithId({ key: user.username }, expires_in);
       const userUid = encrypt(user.id);
       const apiKey = uuidv1();
-     
+
       data = {
         firstName: user.displayName,
         lastName: user.displayName,
@@ -177,7 +174,7 @@ const createAdminAccount = async (req, res) => {
         jwtToken: jwtToken,
         googleAccountData: null,
         githubAccountData: JSON.stringify(user),
-        apiKey:apiKey
+        apiKey: apiKey,
       };
 
       let schema =
@@ -213,11 +210,137 @@ const createAdminAccount = async (req, res) => {
           }
         });
       }
-
-    }else{
-      res.status(501).send({ responseMessage: "Invalid user id" });     
+    } else {
+      res.status(501).send({ responseMessage: "Invalid user id" });
     }
   } else if (authType == "userName&Password") {
+    let defaultProfile =
+      "https://firebasestorage.googleapis.com/v0/b/discussion-manager.appspot.com/o/profileDeafultImages%2Fdefault_image.png?alt=media&token=432b7002-1168-4678-8339-eca37d06d25a";
+    admin
+      .auth()
+      .createUser({
+        email: req.body.email,
+        phoneNumber: req.body.mobileNumber,
+        password: req.body.password,
+        emailVerified: false,
+        displayName: req.body.firstName + req.body.lastName,
+        address: null,
+        onlineStatus: "online",
+        photoUrl: defaultProfile,
+        disabled: false,
+      })
+
+      .then((userRecord) => {
+        // See the UserRecord reference doc for the contents of userRecord.
+        firebase
+          .auth()
+          .signInWithEmailAndPassword(req.body.email, req.body.password)
+          .then(async (userCredential) => {
+            // Signed in
+            var user = userCredential.user;
+            const jwtToken = generateTokenWithId(
+              { key: user.email },
+              expires_in
+            );
+            const userUid = encrypt(user.uid);
+            const apiKey = uuidv1();
+
+            data = {
+              firstName: req.body.firstName,
+              lastName: req.body.lastName,
+              email: req.body.email,
+              profilePhotoUrl: defaultProfile,
+              userUid: userUid,
+              jwtToken: jwtToken,
+              googleAccountData: null,
+              githubAccountData: null,
+              apiKey: apiKey,
+            };
+
+            let schema =
+              accountType == "admin"
+                ? admin_users_schema
+                : developers_users_schema;
+            // lets check if account exists or not.
+            const record = await schema.findOneAndUpdate(
+              { email: data.email },
+              { jwtToken: jwtToken },
+              { new: true }
+            );
+            if (record) {
+              res.status(200).send({
+                responseMessage: "Account already exists",
+                responseCode: ALREADY_CREATED_ACCOUNT,
+                responsePayload: record,
+              });
+            } else {
+              // if already account does not exist
+              schema.create(data, (error, insertedData) => {
+                if (!error) {
+                  console.log("insertedData", insertedData);
+
+                  var userL = firebase.auth().currentUser;
+                  userL
+                    .sendEmailVerification()
+                    .then(function () {
+                      // Email sent.
+                      res.status(200).send({
+                        responseMessage:
+                          "A verification email has been sent to you kindly verify",
+                        responsePayload: null,
+                        responseCode: CREATED_ACCOUNT,
+                      });
+                    })
+                    .catch(function (error) {
+                      var errorCode = error.code;
+                      var errorMessage = error.message;
+                      console.log(error);
+                      res.status(200).send({
+                        responseMessage: errorMessage,
+                        responseCode: COULD_NOT_CREATE_ACCOUNT,
+                        responsePayload: error,
+                      });
+                    });
+                } else {
+                  admin
+                    .auth()
+                    .deleteUser(user.uid)
+                    .then(() => {
+                      res.status(200).send({
+                        responseMessage: "Could not create account in mongo db",
+                        responseCode: COULD_NOT_CREATE_ACCOUNT,
+                        responsePayload: error,
+                      });
+                    })
+                    .catch((error) => {
+                      res.status(200).send({
+                        responseMessage: "Could not create account in mongo db",
+                        responseCode: COULD_NOT_CREATE_ACCOUNT,
+                        responsePayload: error,
+                      });
+                    });
+                }
+              });
+            }
+          })
+          .catch((error) => {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            res.status(200).send({
+              responseMessage: errorMessage,
+              responseCode: COULD_NOT_CREATE_ACCOUNT,
+              responsePayload: error,
+            });
+          });
+      })
+      .catch((error) => {
+        console.log("Error creating new user:", error);
+        res.status(400).send({
+          responseMessage: error,
+          responseCode: COULD_NOT_CREATE_ACCOUNT,
+          responsePayload: error,
+        });
+      });
   }
 };
 
@@ -355,7 +478,7 @@ const generateAndUpdateAPIKey = async (req, res) => {
     { new: true }
   );
   if (record) {
-    console.log(record)
+    console.log(record);
     res.status(200).send({
       responseMessage: "Updated the apiKey successfully",
       responseCode: DATA_UPDATED,

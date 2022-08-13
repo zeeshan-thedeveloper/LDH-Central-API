@@ -28,5 +28,6 @@ const firestorage = admin.storage().bucket()
 module.exports={
     admin,
     firestore,
-    firestorage
+    firestorage,
+    firebase
 }
