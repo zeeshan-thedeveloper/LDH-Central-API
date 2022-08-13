@@ -1,6 +1,7 @@
 const passport = require("passport");
 const { requestsListCache } = require("../cache-store/cache");
 const { firebase, admin } = require("../firebase-database/firebase-connector");
+var mongoose = require("mongoose");
 const {
   admin_users_schema,
 } = require("../mongodb/schemas/admin-schemas/admin-users");
@@ -32,6 +33,8 @@ const {
   DATA_NOT_UPDATED,
   COULD_NOT_LOGIN,
   LOGGED_SUCCESSFULLY,
+  COULD_NOT_DELETE,
+  DELETED,
 } = require("./responses/responses");
 const {
   generateTokenWithId,
@@ -41,6 +44,9 @@ const { FRONT_END_BASE_URL } = require("../request-manager/urls");
 const {
   host_users_schema,
 } = require("../mongodb/schemas/host-schemas/host-users");
+const {
+  dev_admin_con_schema,
+} = require("../mongodb/schemas/developer-and-admin-connection-schema/developer-and-admin-connection-schema");
 
 const expires_in = "1h";
 
@@ -100,7 +106,7 @@ const onGithubAuthFailure = (req, res) => {
 
 const createAdminAccount = async (req, res) => {
   const { authType, user_Id, accountType } = req.body;
- 
+
   if (authType == "google") {
     const id = decrypt(user_Id);
     if (id) {
@@ -119,10 +125,10 @@ const createAdminAccount = async (req, res) => {
         googleAccountData: JSON.stringify(user),
         githubAccountData: null,
         apiKey: apiKey,
-        authType:authType
+        authType: authType,
       };
       console.log(accountType);
-      let schema = 
+      let schema =
         accountType == "admin" ? admin_users_schema : developers_users_schema;
       // lets check if account exists or not.
       const record = await schema.findOneAndUpdate(
@@ -178,7 +184,7 @@ const createAdminAccount = async (req, res) => {
         googleAccountData: null,
         githubAccountData: JSON.stringify(user),
         apiKey: apiKey,
-        authType:authType
+        authType: authType,
       };
 
       let schema =
@@ -258,7 +264,7 @@ const createAdminAccount = async (req, res) => {
               googleAccountData: null,
               githubAccountData: null,
               apiKey: apiKey,
-              authType:authType
+              authType: authType,
             };
 
             let schema =
@@ -348,91 +354,203 @@ const createAdminAccount = async (req, res) => {
   }
 };
 
-const loginToAccount=(req,res)=>{
-  const {email,password,accountType}=req.body
-  try{
-    firebase.auth().signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-     // Signed in
-    var user = userCredential.user;
-    if(user.emailVerified)
-    {
-        console.log("user",user.email)   
-        const schema = accountType=="admin" ? admin_users_schema : developers_users_schema
-        schema.findOne({email:user.email},(err,data)=>{
-          console.log("data",data)
-          if(data){
-            res.status(200).send({
-              responseMessage:"Login Successful",
-              responseCode:LOGGED_SUCCESSFULLY,
-              responsePayload:data
-          })
-          }else{
-            res.status(200).send({
-              responseMessage:"Did not find the record in central database",
-              responseCode:COULD_NOT_LOGIN,
-              responsePayload:null
-          })
-          }
-        })
-       
-    }
-    else
-    {
-        res.status(200).send({
-            responseMessage:"Please verify email, and if you don't find email please check spam folder",
-            responseCode:COULD_NOT_LOGIN,
-            responsePayload:user.uid
-        })
-    }
-
-    }) .catch((error) => {
-                var errorCode = error.code;
-                var errorMessage = error.message;
-                res.status(400).send({
-                    responseMessage:errorMessage,
-                    responseCode:COULD_NOT_LOGIN,
-                })  
-    });
-    }
-    catch(t)
-    {
-        es.status(400).send({
-            responseMessage:t.message,
-            responseCode:COULD_NOT_LOGIN,
-            responsePayload:t
-        })  
-    }
-}
-
-const resetMyAccountPassword=(req,res)=>{
-  const {email} = req.body;
-  if(email){
-  var auth = firebase.auth();
-        auth.sendPasswordResetEmail(email).then(function() 
-        {
-            res.status(200).send({
-                responseMessage:"Reset password email is sent",
-                responseCode:FETCHED,
-                responsePayload:null
-            })
-        }).catch(function(error) 
-        {
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            res.status(404).send({
-                responseMessage:errorMessage,
-                responseCode:COULD_NOT_FETCH
-            })
+const loginToAccount = (req, res) => {
+  const { email, password, accountType } = req.body;
+  try {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        // Signed in
+        var user = userCredential.user;
+        if (user.emailVerified) {
+          console.log("user", user.email);
+          const schema =
+            accountType == "admin"
+              ? admin_users_schema
+              : developers_users_schema;
+          schema.findOne({ email: user.email }, (err, data) => {
+            console.log("data", data);
+            if (data) {
+              res.status(200).send({
+                responseMessage: "Login Successful",
+                responseCode: LOGGED_SUCCESSFULLY,
+                responsePayload: data,
+              });
+            } else {
+              res.status(200).send({
+                responseMessage: "Did not find the record in central database",
+                responseCode: COULD_NOT_LOGIN,
+                responsePayload: null,
+              });
+            }
+          });
+        } else {
+          res.status(200).send({
+            responseMessage:
+              "Please verify email, and if you don't find email please check spam folder",
+            responseCode: COULD_NOT_LOGIN,
+            responsePayload: user.uid,
+          });
+        }
+      })
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        res.status(400).send({
+          responseMessage: errorMessage,
+          responseCode: COULD_NOT_LOGIN,
         });
-    }else{
-      res.status(404).send({
-        responseMessage:"Please provide email",
-        responseCode:COULD_NOT_FETCH,
-        responsePayload:null
-    })
+      });
+  } catch (t) {
+    es.status(400).send({
+      responseMessage: t.message,
+      responseCode: COULD_NOT_LOGIN,
+      responsePayload: t,
+    });
+  }
+};
+
+const resetMyAccountPassword = (req, res) => {
+  const { email } = req.body;
+  if (email) {
+    var auth = firebase.auth();
+    auth
+      .sendPasswordResetEmail(email)
+      .then(function () {
+        res.status(200).send({
+          responseMessage: "Reset password email is sent",
+          responseCode: FETCHED,
+          responsePayload: null,
+        });
+      })
+      .catch(function (error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        res.status(404).send({
+          responseMessage: errorMessage,
+          responseCode: COULD_NOT_FETCH,
+        });
+      });
+  } else {
+    res.status(404).send({
+      responseMessage: "Please provide email",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: null,
+    });
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  const { _id, accountType, authType } = req.body;
+
+  if (_id) {
+    let schema =
+      accountType == "admin" ? admin_users_schema : developers_users_schema;
+    if (authType == "userName&Password") {
+      //burger record .. need to be deleted from firebase first
+      const {email,password}=req.body;
+      try{
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          var user = userCredential.user;
+          admin
+            .auth()
+            .deleteUser(user.uid)
+            .then(async() => {
+              console.log("Deleted from firebase")
+
+              const result1 = await schema.deleteOne({ _id: _id });
+
+              let result2 = null;
+              if (result1.acknowledged) {
+                result2 =
+                  accountType == "admin"
+                    ? await dev_admin_con_schema.deleteOne({ adminId: _id })
+                    : await dev_admin_con_schema.deleteOne({ developerId: _id });
+                if (result2.acknowledged) {
+
+                  res.status(200).send({
+                    responseMessage:
+                      "Successfully deleted account and relative records",
+                    responseCode: DELETED,
+                    responsePayload: result2,
+                  });
+
+                } else {
+                  res.status(200).send({
+                    responseMessage: "There was error in deleting from dev_admin_con",
+                    responseCode: COULD_NOT_DELETE,
+                    responsePayload: result2,
+                  });
+                }
+              } else {
+                res.status(200).send({
+                  responseMessage: "There was error in deleting from admin",
+                  responseCode: COULD_NOT_DELETE,
+                  responsePayload: result1,
+                });
+              }
+
+             
+            })
+            .catch((error) => {
+              res.status(200).send({
+                responseMessage: "Could not delete account from firebase",
+                responseCode: COULD_NOT_CREATE_ACCOUNT,
+                responsePayload: error,
+              });
+            });
+        });
+      }catch(error){
+        res.status(200).send({
+          responseMessage: "Could not delete account from firebase",
+          responseCode: COULD_NOT_CREATE_ACCOUNT,
+          responsePayload: error,
+        });
+      }
+    } else {
+      // need to delete only from central db
+
+      const result1 = await schema.deleteOne({ _id: _id });
+      let result2 = null;
+      if (result1.acknowledged) {
+        result2 =
+          accountType == "admin"
+            ? await dev_admin_con_schema.deleteOne({ adminId: _id })
+            : await dev_admin_con_schema.deleteOne({ developerId: _id });
+        if (result2.acknowledged) {
+          res.status(200).send({
+            responseMessage:
+              "Successfully deleted account and relative records",
+            responseCode: DELETED,
+            responsePayload: result2,
+          });
+        } else {
+          res.status(200).send({
+            responseMessage: "There was error in deleting from dev_admin_con",
+            responseCode: COULD_NOT_DELETE,
+            responsePayload: result2,
+          });
+        }
+      } else {
+        res.status(200).send({
+          responseMessage: "There was error in deleting from admin",
+          responseCode: COULD_NOT_DELETE,
+          responsePayload: result1,
+        });
+      }
     }
-}
+  } else {
+    res.status(200).send({
+      responseMessage: "Please provide a valid id",
+      responseCode: COULD_NOT_DELETE,
+      responsePayload: null,
+    });
+  }
+};
 
 const getListOfAdminAccounts = (req, res) => {
   const { hostId } = req.body;
@@ -603,5 +721,6 @@ module.exports = {
   test,
   generateAndUpdateAPIKey,
   loginToAccount,
-  resetMyAccountPassword
+  resetMyAccountPassword,
+  deleteAccount,
 };
