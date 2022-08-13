@@ -405,6 +405,35 @@ const loginToAccount=(req,res)=>{
     }
 }
 
+const resetMyAccountPassword=(req,res)=>{
+  const {email} = req.body;
+  if(email){
+  var auth = firebase.auth();
+        auth.sendPasswordResetEmail(email).then(function() 
+        {
+            res.status(200).send({
+                responseMessage:"Reset password email is sent",
+                responseCode:FETCHED,
+                responsePayload:null
+            })
+        }).catch(function(error) 
+        {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            res.status(404).send({
+                responseMessage:errorMessage,
+                responseCode:COULD_NOT_FETCH
+            })
+        });
+    }else{
+      res.status(404).send({
+        responseMessage:"Please provide email",
+        responseCode:COULD_NOT_FETCH,
+        responsePayload:null
+    })
+    }
+}
+
 const getListOfAdminAccounts = (req, res) => {
   const { hostId } = req.body;
   console.log("here is host id " + hostId);
@@ -573,5 +602,6 @@ module.exports = {
   getJWTToken,
   test,
   generateAndUpdateAPIKey,
-  loginToAccount
+  loginToAccount,
+  resetMyAccountPassword
 };

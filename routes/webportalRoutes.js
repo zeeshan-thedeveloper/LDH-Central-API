@@ -18,6 +18,7 @@ webportal.get("/onGithubAuthSucess",authController.onGithubAuthSucess);
 webportal.get("/onGithubAuthFailure",authController.onGithubAuthFailure);
 webportal.post("/createAdminAccount",authController.createAdminAccount);
 webportal.post("/loginToAccount",authController.loginToAccount);
+webportal.post("/resetMyAccountPassword",authController.resetMyAccountPassword)
 webportal.post("/ ",authController.verifyJWTToken);
 webportal.post("/getJwtToken",authController.getJWTToken);
 webportal.get("/test",authController.test);
