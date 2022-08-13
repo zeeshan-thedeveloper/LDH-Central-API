@@ -30,6 +30,8 @@ const {
   ACCONT_CREATED,
   DATA_UPDATED,
   DATA_NOT_UPDATED,
+  COULD_NOT_LOGIN,
+  LOGGED_SUCCESSFULLY,
 } = require("./responses/responses");
 const {
   generateTokenWithId,
@@ -98,7 +100,7 @@ const onGithubAuthFailure = (req, res) => {
 
 const createAdminAccount = async (req, res) => {
   const { authType, user_Id, accountType } = req.body;
-
+ 
   if (authType == "google") {
     const id = decrypt(user_Id);
     if (id) {
@@ -119,7 +121,7 @@ const createAdminAccount = async (req, res) => {
         apiKey: apiKey,
       };
       console.log(accountType);
-      let schema =
+      let schema = 
         accountType == "admin" ? admin_users_schema : developers_users_schema;
       // lets check if account exists or not.
       const record = await schema.findOneAndUpdate(
@@ -244,7 +246,6 @@ const createAdminAccount = async (req, res) => {
             );
             const userUid = encrypt(user.uid);
             const apiKey = uuidv1();
-
             data = {
               firstName: req.body.firstName,
               lastName: req.body.lastName,
@@ -343,6 +344,62 @@ const createAdminAccount = async (req, res) => {
       });
   }
 };
+
+const loginToAccount=(req,res)=>{
+  const {email,password,accountType}=req.body
+  try{
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+     // Signed in
+    var user = userCredential.user;
+    if(user.emailVerified)
+    {
+        
+        const schema = accountType=="admin " ? admin_users_schema : developers_users_schema
+        schema.findOne({email:user.email},(err,data)=>{
+          if(data){
+            res.status(200).send({
+              responseMessage:"Login Successful",
+              responseCode:LOGGED_SUCCESSFULLY,
+              responsePayload:data
+          })
+          }else{
+            res.status(200).send({
+              responseMessage:"Did not find the record in central database",
+              responseCode:COULD_NOT_LOGIN,
+              responsePayload:null
+          })
+          }
+        })
+       
+    }
+    else
+    {
+        res.status(200).send({
+            responseMessage:"Please verify email, and if you don't find email please check spam folder",
+            responseCode:COULD_NOT_LOGIN,
+            responsePayload:user.uid
+        })
+    }
+
+    }) .catch((error) => {
+                var errorCode = error.code;
+                var errorMessage = error.message;
+                res.status(400).send({
+                    responseMessage:errorMessage,
+                    responseCode:COULD_NOT_LOGIN,
+                })  
+    });
+    }
+    catch(t)
+    {
+        es.status(400).send({
+            responseMessage:t.message,
+            responseCode:COULD_NOT_LOGIN,
+            responsePayload:t
+        })  
+    }
+}
 
 const getListOfAdminAccounts = (req, res) => {
   const { hostId } = req.body;
@@ -512,4 +569,5 @@ module.exports = {
   getJWTToken,
   test,
   generateAndUpdateAPIKey,
+  loginToAccount
 };
