@@ -47,6 +47,10 @@ const admin_user = new mongoose.Schema({
         type:String,
         required:false,
         default:"Generate an api key"
+    },
+    authType:{
+        type:String,
+        required:false
     }
 });
 

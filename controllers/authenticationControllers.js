@@ -119,6 +119,7 @@ const createAdminAccount = async (req, res) => {
         googleAccountData: JSON.stringify(user),
         githubAccountData: null,
         apiKey: apiKey,
+        authType:authType
       };
       console.log(accountType);
       let schema = 
@@ -177,6 +178,7 @@ const createAdminAccount = async (req, res) => {
         googleAccountData: null,
         githubAccountData: JSON.stringify(user),
         apiKey: apiKey,
+        authType:authType
       };
 
       let schema =
@@ -256,6 +258,7 @@ const createAdminAccount = async (req, res) => {
               googleAccountData: null,
               githubAccountData: null,
               apiKey: apiKey,
+              authType:authType
             };
 
             let schema =
@@ -354,9 +357,10 @@ const loginToAccount=(req,res)=>{
     var user = userCredential.user;
     if(user.emailVerified)
     {
-        
-        const schema = accountType=="admin " ? admin_users_schema : developers_users_schema
+        console.log("user",user.email)   
+        const schema = accountType=="admin" ? admin_users_schema : developers_users_schema
         schema.findOne({email:user.email},(err,data)=>{
+          console.log("data",data)
           if(data){
             res.status(200).send({
               responseMessage:"Login Successful",
