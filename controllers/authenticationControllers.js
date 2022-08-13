@@ -503,11 +503,17 @@ const deleteAccount = async (req, res) => {
                 responsePayload: error,
               });
             });
-        });
+        },(error)=>{
+          res.status(200).send({
+            responseMessage: error.message,
+            responseCode: COULD_NOT_DELETE,
+            responsePayload: error,
+          });  
+        })
       }catch(error){
         res.status(200).send({
           responseMessage: "Could not delete account from firebase",
-          responseCode: COULD_NOT_CREATE_ACCOUNT,
+          responseCode: COULD_NOT_DELETE,
           responsePayload: error,
         });
       }
@@ -643,17 +649,28 @@ const getListOfDeveloperAccounts = (req, res) => {
   });
 };
 
-const verifyJWTToken = (req, res) => {
+const verifyJWTToken = async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
+  const {_id,accountType}=req.body;
   console.log("token to verify", token);
   if (token != null) {
     const verficationResponse = verifyToken(token);
     console.log("verify token: ", verficationResponse);
     if (verficationResponse.key != undefined) {
-      res.status(200).send({
-        responseMessage: "Token is verified",
-        responseCode: TOKEN_VERIFIED,
-      });
+      //check if this exist or not.
+      const record = accountType=="admin" ? await admin_users_schema.findOne({_id:_id}) : await developers_users_schema.findOne({_id:_id}) 
+      console.log(record)
+      if(record){
+        res.status(200).send({
+          responseMessage: "Token is verified",
+          responseCode: TOKEN_VERIFIED,
+        });
+      }else{
+        res.status(200).send({
+          responseMessage: "Token is verified but this account does'nt exists any more",
+          responseCode: TOKEN_NOT_VERIFIED,
+        });
+      }
     } else {
       // problem
       res.status(200).send({

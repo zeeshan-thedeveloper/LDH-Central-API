@@ -21,7 +21,7 @@ webportal.post("/loginToAccount",authController.loginToAccount);
 webportal.post("/resetMyAccountPassword",authController.resetMyAccountPassword)
 webportal.post("/deleteAccount",authController.deleteAccount)
 
-webportal.post("/ ",authController.verifyJWTToken);
+webportal.post("/verifyJWTToken",authController.verifyJWTToken);
 webportal.post("/getJwtToken",authController.getJWTToken);
 webportal.get("/test",authController.test);
 webportal.post("/setStatusOfHostAccessUrl",hostAccessUrlController.setStatusOfHostAccessUrl);
