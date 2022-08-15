@@ -9,7 +9,7 @@ const addRequestInDeniedRequestHistory = (
   requestDateAndTime,
   requestStatus,
   requestResolved,
-  adminId
+  adminId 
 ) => {
   return new Promise((resolve, reject) => {
     denied_requests_history_schema.create({
