@@ -6,6 +6,9 @@ const { generateTokenWithId } = require("../token-manager/token-manager");
 const { DATA_UPDATED, DATA_NOT_UPDATED, FETCHED } = require("./responses/responses");
 const events = require('../events-engine/Events');
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
+const { remote_database_endpoints_schema } = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
+const { resolved_requests_history_schema } = require("../mongodb/schemas/request-history-schema/resolved-request-history-schema");
+const { denied_requests_history_schema } = require("../mongodb/schemas/request-history-schema/denied-request-history-schema");
 const setStatusOfHostAccessUrl=async (req, res)=>{
     const {hostId,status}=req.body;
     const record = await host_users_schema.findOneAndUpdate(
@@ -97,15 +100,135 @@ const executeMysqlQuery=async (req, res)=>{
   })
 }
 
+const getTotalNumberOfRemoteAccessUrlsByAdminId = async (req, res) => {
+
+  const { adminId } = req.body;
+  const result =  await remote_database_endpoints_schema.find(
+    { ownerAdminId: adminId }
+  ).count()
+  console.log(result)
+  if (result) {
+    res.status(200).send({
+      responseMessage: "Successfully loaded number of remote database access urls [open-apis]",
+      responseCode: FETCHED,
+      responsePayload: result,
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not loaded number of remote database access urls [open-apis]",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: null,
+    });
+  }
+
+};
+
+const getTotalNumberOfEntertainedRequestsByAdminId = async (req, res) => {
+
+  const { adminId } = req.body;
+  const result =  await resolved_requests_history_schema.find(
+    { adminId: adminId }
+  ).count()
+  if (result) {
+    res.status(200).send({
+      responseMessage: "Successfully loaded number of entertained requests",
+      responseCode: FETCHED,
+      responsePayload: result,
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not loaded number of entertained requests",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: null,
+    });
+  }
+
+};
+
+const getTotalNumberOfEntertainedRequestsByDeveloperEmail = async (req, res) => {
+
+  const { email } = req.body;
+  const result =  await resolved_requests_history_schema.find(
+    { requestSender: email }
+  ).count()
+  if (result) {
+    res.status(200).send({
+      responseMessage: "Successfully loaded number of entertained requests",
+      responseCode: FETCHED,
+      responsePayload: result,
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not loaded number of entertained requests",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: null,
+    });
+  }
+
+};
+
+const getTotalNumberOfDeniedRequestsByAdminId = async (req, res) => {
+
+  const { adminId } = req.body;
+  const result =  await denied_requests_history_schema.find(
+    { adminId: adminId }
+  ).count()
+  if (result) {
+    res.status(200).send({
+      responseMessage: "Successfully loaded number of denied requests",
+      responseCode: FETCHED,
+      responsePayload: result,
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not loaded number of denied requests",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: null,
+    });
+  }
+
+};
+
+const getTotalNumberOfDeniedRequestsByDeveloperEmail = async (req, res) => {
+
+  const { email } = req.body;
+  const result =  await denied_requests_history_schema.find(
+    { requestSender: email }
+  ).count()
+  if (result) {
+    res.status(200).send({
+      responseMessage: "Successfully loaded number of denied requests",
+      responseCode: FETCHED,
+      responsePayload: result,
+    });
+  } else {
+    res.status(200).send({
+      responseMessage: "Could not loaded number of denied requests",
+      responseCode: COULD_NOT_FETCH,
+      responsePayload: null,
+    });
+  }
+
+};
+
+
+
 const resolveMYSQLQuery=(req, res) => {
   const {hostId,requestId,query,response,databaseName} = req.body
   addUpdate_developers_host_access_url_request_list_cache(hostId,requestId,query,databaseName,response);
   res.status(200).send({responseMessage:"Resolved query successfully"})
 }
 
+
 module.exports ={
     setStatusOfHostAccessUrl,
     getHostAccessUrlToken,
     executeMysqlQuery,
     resolveMYSQLQuery,
+    getTotalNumberOfRemoteAccessUrlsByAdminId,
+    getTotalNumberOfEntertainedRequestsByAdminId,
+    getTotalNumberOfEntertainedRequestsByDeveloperEmail,
+    getTotalNumberOfDeniedRequestsByAdminId,
+    getTotalNumberOfDeniedRequestsByDeveloperEmail
+    
 }

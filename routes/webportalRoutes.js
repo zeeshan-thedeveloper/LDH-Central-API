@@ -41,6 +41,11 @@ webportal.post("/makePayment",paymentController.makePayment);
 webportal.post("/updateRemoteDbAccessUrlVisibility",remoteDatabaseAccessUrl.updateRemoteDbAccessUrlVisibility);
 webportal.post("/terminateAllUrlByAdminId",authController.terminateAllUrlByAdminId);
 webportal.post("/getTotalNumberOfConnectedDevelopersByAdminId",developerLayerController.getTotalNumberOfConnectedDevelopersByAdminId)
+webportal.post("/getTotalNumberOfConnectedHostsByAdminId",hostController.getTotalNumberOfConnectedHostsByAdminId)
+webportal.post("/getTotalNumberOfRemoteAccessUrlsByAdminId",hostAccessUrlController.getTotalNumberOfRemoteAccessUrlsByAdminId)
+webportal.post("/getTotalNumberOfEntertainedRequestsByAdminId",hostAccessUrlController.getTotalNumberOfEntertainedRequestsByAdminId)
+webportal.post("/getTotalNumberOfDeniedRequestsByAdminId",hostAccessUrlController.getTotalNumberOfDeniedRequestsByAdminId)
 module.exports = {
     webportal
 };
+ 

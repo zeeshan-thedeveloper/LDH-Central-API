@@ -316,6 +316,7 @@ const generateTokenForDeveloper = (req, res) => {
   });
 };
 
+
 const getTotalNumberOfConnectedDevelopersByAdminId = async (req, res) => {
   const { adminId } = req.body;
   const result = await dev_admin_con_schema

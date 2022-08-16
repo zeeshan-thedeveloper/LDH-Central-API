@@ -20,6 +20,8 @@ const get_host_info_list_cache=(hostId) => {
             
             list.forEach(element => {
                 console.log(hostId)
+                //TODO:Ajeeb problem
+                if(element.hostId!=undefined)
                 if (element.hostId===hostId){
                     // console.log("Present host ",element)
                     resolve(element)

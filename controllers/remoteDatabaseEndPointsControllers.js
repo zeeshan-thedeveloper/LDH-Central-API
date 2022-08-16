@@ -254,11 +254,50 @@ const getListOfAllRemoteDatabaseEndpointsByDeveloperIdId = (req, res) => {
   });
 };
 
+
+const getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId = async (req, res) => {
+  const { developerId } = req.body;
+  const result =  await developers_users_schema.find(
+    { _id: developerId }
+  );
+  
+  const countConnectedUrls=(allowedUrl)=>{
+    return new Promise(async(resolve,reject)=>{
+        const n = remote_database_endpoints_schema.find({ownerAdminId:allowedUrl.adminId,isEnabled:"true",isPublic:true}).count();
+        resolve(n);
+    })
+  }
+  const promises = result[0].allowedHostAccessUrls.map(countConnectedUrls);
+  const results = Promise.all(promises);
+  results.then((data)=>{
+    let r=0;
+    data.forEach((m)=>{
+      r=r+m
+    })
+    console.log(r)
+  })
+  // if (result) {
+  //   res.status(200).send({
+  //     responseMessage: "Successfully loaded number of connected hosts",
+  //     responseCode: FETCHED,
+  //     responsePayload: result[0].allowedHostAccessUrls.map((item)=> { if(item.requestStatus=="Accept") return item}).length,
+  //   });
+  // } else {
+  //   res.status(200).send({
+  //     responseMessage: "Could not loaded number of connected hosts",
+  //     responseCode: COULD_NOT_FETCH,
+  //     responsePayload: null,
+  //   });
+  // }
+
+};
+
 module.exports = {
   createRemoteDatabaseEndpoint,
   getListOfRemoteDatabaseAccessUrlsByAdminId,
   updateRemoteDbAccessUrlStatus,
   removeRemoteDatabaseQuery,
   getListOfAllRemoteDatabaseEndpointsByDeveloperIdId,
-  updateRemoteDbAccessUrlVisibility
+  updateRemoteDbAccessUrlVisibility,
+  getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId
 };
