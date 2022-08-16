@@ -256,9 +256,9 @@ const getListOfAllRemoteDatabaseEndpointsByDeveloperIdId = (req, res) => {
 
 
 const getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId = async (req, res) => {
-  const { developerId } = req.body;
+  const { email } = req.body;
   const result =  await developers_users_schema.find(
-    { _id: developerId }
+    { email: email }
   );
   
   const countConnectedUrls=(allowedUrl)=>{
@@ -267,15 +267,29 @@ const getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId = async (req,
         resolve(n);
     })
   }
-  const promises = result[0].allowedHostAccessUrls.map(countConnectedUrls);
-  const results = Promise.all(promises);
-  results.then((data)=>{
-    let r=0;
-    data.forEach((m)=>{
-      r=r+m
+  
+  if(result.length>0){
+    const promises = result[0].allowedHostAccessUrls.map(countConnectedUrls);
+    const results = Promise.all(promises);
+    results.then((data)=>{
+      let r=0;
+      data.forEach((m)=>{
+        r=r+m
+      })
+      console.log(r)
+      res.status(200).send({
+            responseMessage: "Successfully loaded number of connected hosts",
+            responseCode: FETCHED,
+            responsePayload: r,
+          });
     })
-    console.log(r)
-  })
+  }else{
+    res.status(200).send({
+          responseMessage: "Could not loaded number of connected hosts",
+          responseCode: COULD_NOT_FETCH,
+          responsePayload: null,
+        });
+  }
   // if (result) {
   //   res.status(200).send({
   //     responseMessage: "Successfully loaded number of connected hosts",

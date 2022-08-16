@@ -294,7 +294,7 @@ const getTotalNumberOfConnectedHostsByAdminId = async (req, res) => {
     { _id: adminId }
   );
 
-  if (result) {
+  if (result.length>0) {
     res.status(200).send({
       responseMessage: "Successfully loaded number of connected hosts",
       responseCode: FETCHED,
@@ -311,12 +311,12 @@ const getTotalNumberOfConnectedHostsByAdminId = async (req, res) => {
 };
 
 const getTotalNumberOfConnectedHostsByDeveloperId = async (req, res) => {
-  const { developerId } = req.body;
+  const { email } = req.body;
   const result =  await developers_users_schema.find(
-    { _id: developerId }
+    { email: email }
   );
 
-  if (result) {
+  if (result.length>0) {
     res.status(200).send({
       responseMessage: "Successfully loaded number of connected hosts",
       responseCode: FETCHED,
