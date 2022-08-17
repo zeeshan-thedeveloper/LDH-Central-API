@@ -1,4 +1,4 @@
-const { get_host_info_list_cache, addUpdate_developers_host_access_url_request_list_cache } = require("../cache-store/cache-operations");
+const { get_host_info_list_cache, addUpdate_developers_host_access_url_request_list_cache, removeItemFrom_available_and_connected_host_list_cache } = require("../cache-store/cache-operations");
 const emiter = require("../events-engine/Emiters");
 const { host_users_schema } = require("../mongodb/schemas/host-schemas/host-users");
 const { checkIfHostIsConnectedAndOnline, sendMySQLQueryToHost, checkForMYSQLRequestStatus } = require("../queryProcessingAndFormatingEngine/queryProcessingEngine");
@@ -88,10 +88,20 @@ const executeMysqlQuery=async (req, res)=>{
 
   response().then((success)=>{
     console.log("Response -1 : ",success);
-    res.send({
-      responseMessage:"Successfully resolved the query with response  "+success,
-      responsePayload:success
-    })
+    if(success){
+      res.send({
+        responseMessage:"Successfully resolved the query with response  "+success,
+        responsePayload:success
+      })
+    }else{
+      //remove from cache.
+      let hostId = hostAccessUrl.split("/")[2]; 
+      removeItemFrom_available_and_connected_host_list_cache(null,hostId);
+      res.send({
+        responseMessage:"It looks like host is down currently so try later.  ",
+        responsePayload:success
+      })
+    }
   },(fail)=>{
     res.send({
       responseMessage:"could not successfully resolved the query with response  ",

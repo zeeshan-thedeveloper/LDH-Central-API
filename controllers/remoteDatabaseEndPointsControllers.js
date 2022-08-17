@@ -284,6 +284,7 @@ const getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId = async (req,
           });
     })
   }else{
+    
     res.status(200).send({
           responseMessage: "Could not loaded number of connected hosts",
           responseCode: COULD_NOT_FETCH,
