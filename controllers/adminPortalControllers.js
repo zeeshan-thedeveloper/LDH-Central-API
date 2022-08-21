@@ -221,12 +221,13 @@ const getListOfDeniedRequestsByAdminId = async (req, res) => {
   if (data) {
       const getData=(request)=>{
         return new Promise(async(resolve,reject)=>{
+          const hostData =await host_users_schema.findOne({hostId:request.requestTargetHost})
           const dev =await developers_users_schema.findOne({email:request.requestSender});
           if(dev){
-            resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName})
+            resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName,hostData:hostData})
           }else{
            const adm =await admin_users_schema.findOne({email:request.requestSender}); 
-           resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName})       
+           resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName,hostData:hostData})       
           }
         })
     }
@@ -261,14 +262,16 @@ const getListOfResolvedRequestsByAdminId = async (req, res) => {
     .find({ adminId: adminId })
     .sort({ requestId: -1 });
   if (data) {
+
       const getData=(request)=>{
         return new Promise(async(resolve,reject)=>{
+           const hostData =await host_users_schema.findOne({hostId:request.requestTargetHost})
            const dev =await developers_users_schema.findOne({email:request.requestSender});
            if(dev){
-             resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName})
+             resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName,hostData:hostData})
            }else{
             const adm =await admin_users_schema.findOne({email:request.requestSender}); 
-            resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName})       
+            resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName,hostData:hostData})       
            }
         })
     }
@@ -281,6 +284,7 @@ const getListOfResolvedRequestsByAdminId = async (req, res) => {
         })
       });
     };
+
     fetchDeveloperData(data).then((data) => {
       res.status(200).send({
         responseMessage: "Successfully loaded the list of resolved requests",

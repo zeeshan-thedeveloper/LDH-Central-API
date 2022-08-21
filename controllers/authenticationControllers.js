@@ -346,12 +346,13 @@ const createAdminAccount = async (req, res) => {
       })
       .catch((error) => {
         console.log("Error creating new user:", error);
-        res.status(400).send({
-          responseMessage: error,
+        res.status(200).send({
+          responseMessage: error.message,
           responseCode: COULD_NOT_CREATE_ACCOUNT,
           responsePayload: error,
         });
       });
+      
   }
 };
 
