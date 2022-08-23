@@ -174,6 +174,7 @@ const getListOfConnectedHostsByAdminId = (req, res) => {
       let result = [];
       let list = hosts_info_list_cache.get("hosts_info_list_cache");
       data.forEach((item) => {
+        console.log("connected admn",item)
         let record = {
           hostName: item.hostName,
           hostId: item.hostId,

@@ -253,6 +253,7 @@ const createAdminAccount = async (req, res) => {
               { key: user.email },
               expires_in
             );
+            
             const userUid = encrypt(user.uid);
             const apiKey = uuidv1();
             data = {

@@ -210,8 +210,10 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
 
       const fetchIndividualHostData = (hostId) => {
         return new Promise((resolve, reject) => {
+          // console.log(hostId);
           host_users_schema.find({ hostId: hostId }, (err, data) => {
             if (!err) {
+              // console.log(data)
               resolve(data);
             }
           });
@@ -221,8 +223,17 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
         return new Promise((resolve, reject) => {
           const promises = url.listOfDatabases.map(fetchIndividualHostData);
           const results = Promise.all(promises);
+          let temp=[];
           results.then((data) => {
-            url.listOfDatabases = data[0];
+            data.forEach((item=>{
+              item.forEach((ele)=>{
+                // console.log(ele)
+                temp.push(ele)
+              })
+            }))
+            
+            url.listOfDatabases = temp.map((item)=>item);
+            console.log(url);
             resolve(url);
           });
         });
