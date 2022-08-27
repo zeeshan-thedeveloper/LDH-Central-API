@@ -61,11 +61,13 @@ const addHostInRequestList = (req, res) => {
           if (record) {
             // updated the admin
             addOrUpdate_host_info_list_cache(hostId, hostDeviceId);
+
             res.status(200).send({
               responseMessage: " Host added to waiting list successfully",
               responseCode: ACCONT_CREATED,
               responsePayload: insertedData,
             });
+            
           } else {
             res.status(200).send({
               responseMessage: "Could not update the admin record",
@@ -194,7 +196,7 @@ const getListOfConnectedHostsByAdminId = (req, res) => {
                 flag = true;
               }
           });
-        }
+        } 
         if (!flag) {
           record = { ...record, lastSeenDateAndTime: "Not online" };
         }
@@ -220,7 +222,7 @@ const getListOfConnectedHostsByAdminId = (req, res) => {
 
 const updateHostConnectionStatus = async (req, res) => {
   const { hostId, adminId, status } = req.body;
-
+  
   const record = await host_users_schema.findOneAndUpdate(
     { hostId: hostId, connectedAdmin: adminId },
     {

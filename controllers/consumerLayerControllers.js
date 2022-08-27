@@ -10,12 +10,18 @@ const {
 const {
   host_users_schema,
 } = require("../mongodb/schemas/host-schemas/host-users");
+const {
+  remote_database_endpoints_schema,
+} = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
+
 const { generateTokenWithId } = require("../token-manager/token-manager");
 const {
   FETCHED,
   COULD_NOT_FETCH,
   CREATED_ACCOUNT,
   COULD_NOT_CREATE_ACCOUNT,
+  DATA_UPDATED,
+  DATA_NOT_UPDATED,
 } = require("./responses/responses");
 
 const getListOfServiceProviders = (req, res) => {
@@ -36,7 +42,6 @@ const getListOfServiceProviders = (req, res) => {
           const completeHost = await host_users_schema.findOne({
             hostId: host.hostId,
           });
-          console.log("Complete host", completeHost);
           resolve(completeHost);
         });
       };
@@ -45,15 +50,21 @@ const getListOfServiceProviders = (req, res) => {
         return new Promise(async (resolve, reject) => {
           var promises =
             serviceProvider.connectedHostList.map(individualHostData);
-          var results = await Promise.all(promises);
-
+          var results = Promise.all(promises);
+          let v = await results.then((data) => data);
+          let numberOfOpenAPIs = await remote_database_endpoints_schema
+            .find({ ownerAdminId: serviceProvider._id, isPublic: true })
+            .count();
+          // console.log("connected hosts list : ",serviceProvider.connectedHostList.length)
           let record = {
             serviceProviderId: serviceProvider._id,
             firstName: serviceProvider.firstName,
             lastName: serviceProvider.lastName,
             email: serviceProvider.email,
             profilePhotoUrl: serviceProvider.profilePhotoUrl,
-            connectedHostList: results,
+            // connectedHostList:  [...new Map(v.map((item, key) => [item[key], item])).values()],
+            connectedHostList: v,
+            numberOfOpenAPIs: numberOfOpenAPIs,
           };
 
           resolve(record);
@@ -77,7 +88,7 @@ const getListOfServiceProviders = (req, res) => {
                 let recordsToSend = [];
                 listOfServiceProviders.forEach((record) => {
                   let flag = false;
-                  console.log("Service provider:", record);
+
                   listOfConnectionRequests.forEach((conReq) => {
                     // if (conReq.adminId == record.serviceProviderId) {
                     if (conReq.adminId == record.serviceProviderId) {
@@ -89,6 +100,7 @@ const getListOfServiceProviders = (req, res) => {
                         profilePhotoUrl: record.profilePhotoUrl,
                         connectedHostList: record.connectedHostList,
                         connectionRequest: conReq,
+                        numberOfOpenAPIs: record.numberOfOpenAPIs,
                       };
                       recordsToSend.push(rec);
                       flag = true;
@@ -141,14 +153,17 @@ const getListOfServiceProviders = (req, res) => {
   });
 };
 
-const makeConnectionRequestToAdmin = (req, res) => {
+const makeConnectionRequestToAdmin = async (req, res) => {
   const {
     adminId,
     developerId,
     developerName,
     developerEmail,
     listOfDatabases,
+    requestType,
+    requestId,
   } = req.body;
+
   let date_ob = new Date();
   let date = ("0" + date_ob.getDate()).slice(-2);
   let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
@@ -174,32 +189,60 @@ const makeConnectionRequestToAdmin = (req, res) => {
     adminId + " - " + developerId + " - " + listOfDatabases
   );
 
-  dev_admin_con_schema.create(
-    {
-      developerId: developerId,
-      adminId: adminId,
-      requestTimeAndData: timeAndData,
-      listOfDatabases: listOfDatabases,
-      requestStatus: "Un-resolved",
-      developerName: developerName,
-      developerEmail: developerEmail,
-    },
-    (err, data) => {
-      if (data) {
-        res.status(200).send({
-          responseMessage: "Successfully made a connection request",
-          responseCode: CREATED_ACCOUNT,
-          payload: data,
-        });
-      } else {
-        res.status(200).send({
-          responseMessage: "Could not made a connection request",
-          responseCode: COULD_NOT_CREATE_ACCOUNT,
-          payload: err,
-        });
+  if (requestType == "new") {
+    dev_admin_con_schema.create(
+      {
+        developerId: developerId,
+        adminId: adminId,
+        requestTimeAndData: timeAndData,
+        listOfDatabases: listOfDatabases,
+        requestStatus: "Un-resolved",
+        developerName: developerName,
+        developerEmail: developerEmail,
+      },
+      (err, data) => {
+        if (data) {
+          res.status(200).send({
+            responseMessage: "Successfully made a connection request",
+            responseCode: CREATED_ACCOUNT,
+            payload: data,
+          });
+        } else {
+          res.status(200).send({
+            responseMessage: "Could not made a connection request",
+            responseCode: COULD_NOT_CREATE_ACCOUNT,
+            payload: err,
+          });
+        }
       }
+    );
+  } else if (requestType == "update") {
+    let record = await dev_admin_con_schema.findOneAndUpdate(
+      {
+        _id: requestId,
+      },
+      {
+        listOfDatabases: listOfDatabases,
+      },
+      {
+        nre: true,
+      }
+    );
+
+    if(record){
+      res.status(200).send({
+        responseMessage: "Request Successfully updated ",
+        responseCode: DATA_UPDATED,
+        payload: record,
+      }); 
+    }else{
+      res.status(200).send({
+        responseMessage: "Request could not updated ",
+        responseCode: DATA_NOT_UPDATED,
+        payload: null,
+      }); 
     }
-  );
+  }
 };
 
 const getListOfActiveHostsByDeveloperId = (req, res) => {
@@ -223,16 +266,16 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
         return new Promise((resolve, reject) => {
           const promises = url.listOfDatabases.map(fetchIndividualHostData);
           const results = Promise.all(promises);
-          let temp=[];
+          let temp = [];
           results.then((data) => {
-            data.forEach((item=>{
-              item.forEach((ele)=>{
+            data.forEach((item) => {
+              item.forEach((ele) => {
                 // console.log(ele)
-                temp.push(ele)
-              })
-            }))
-            
-            url.listOfDatabases = temp.map((item)=>item);
+                temp.push(ele);
+              });
+            });
+
+            url.listOfDatabases = temp.map((item) => item);
             console.log(url);
             resolve(url);
           });
@@ -327,7 +370,6 @@ const generateTokenForDeveloper = (req, res) => {
   });
 };
 
-
 const getTotalNumberOfConnectedDevelopersByAdminId = async (req, res) => {
   const { adminId } = req.body;
   const result = await dev_admin_con_schema
@@ -339,7 +381,7 @@ const getTotalNumberOfConnectedDevelopersByAdminId = async (req, res) => {
       responseCode: FETCHED,
       responsePayload: result,
     });
-  }else{
+  } else {
     res.status(200).send({
       responseMessage: "Could not loaded number of connected developers",
       responseCode: COULD_NOT_FETCH,
@@ -353,5 +395,5 @@ module.exports = {
   makeConnectionRequestToAdmin,
   getListOfActiveHostsByDeveloperId,
   generateTokenForDeveloper,
-  getTotalNumberOfConnectedDevelopersByAdminId
+  getTotalNumberOfConnectedDevelopersByAdminId,
 };
