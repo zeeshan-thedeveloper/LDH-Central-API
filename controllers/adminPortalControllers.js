@@ -49,7 +49,7 @@ const getListOfDevelopersRequestsByAdminId = (req, res) => {
             let promises = request.listOfDatabases.map(fetchData);
             let results = Promise.all(promises);
             results.then((data) => {
-              request.listOfDatabases = data[0];
+              request.listOfDatabases = data;
               resolve(request);
             });
           });
@@ -72,6 +72,7 @@ const getListOfDevelopersRequestsByAdminId = (req, res) => {
             responsePayload: response,
           });
         });
+
       } else {
         res.status(200).send({
           responseMessage: "List of connection requests could not fetched",
@@ -104,7 +105,7 @@ const getListOfDevelopersAccountsByAdminId = (req, res) => {
             let promises = request.listOfDatabases.map(fetchData);
             let results = Promise.all(promises);
             results.then((data) => {
-              request.listOfDatabases = data[0];
+              request.listOfDatabases = data;
               resolve(request);
             });
           });

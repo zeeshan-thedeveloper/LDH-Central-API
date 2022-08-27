@@ -223,6 +223,7 @@ const makeConnectionRequestToAdmin = async (req, res) => {
       },
       {
         listOfDatabases: listOfDatabases,
+        requestStatus:"Un-resolved"
       },
       {
         nre: true,
