@@ -24,6 +24,8 @@ const {
   FETCHED,
   DATA_UPDATED,
   COULD_NOT_FETCH,
+  COULD_NOT_DELETE,
+  DELETED,
 } = require("./responses/responses");
 const { developers_users_schema } = require("../mongodb/schemas/consumer-schemas/developer-users");
 
@@ -223,6 +225,9 @@ const getListOfConnectedHostsByAdminId = (req, res) => {
 const updateHostConnectionStatus = async (req, res) => {
   const { hostId, adminId, status } = req.body;
   
+  if(status!="Decline"){
+
+  
   const record = await host_users_schema.findOneAndUpdate(
     { hostId: hostId, connectedAdmin: adminId },
     {
@@ -245,6 +250,33 @@ const updateHostConnectionStatus = async (req, res) => {
       responseMessage: "could not update the host status ",
       responseCode: DATA_NOT_UPDATED,
       payload: record,
+    });
+
+  }
+  }else{
+    //delete hosts.
+    host_users_schema.findOneAndRemove({ hostId: hostId, connectedAdmin: adminId })
+    .then((user) => {
+      if (!user) {
+        res.status(400).send({responseMessage : ' was not found',responseCode:COULD_NOT_DELETE});
+      } else {
+         admin_users_schema.updateOne({ _id: adminId }, {
+          $pull: {
+            connectedHostList: {hostId:hostId},
+          },
+        }).then((data)=>{
+          if(data){
+            //TODO:Remove the host from list allowed url from developer record as well for data consistency 
+            res.status(200).send({responseMessage : ' delete successfully',responseCode:DELETED});
+          }else{
+            res.status(200).send({responseMessage : ' delete from hosts schema successfully but not from admin schema',responseCode:DELETED});
+          }
+        })
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(400).send({responseMessage : ' error while deleting host'+JSON.stringify(err),responseCode:COULD_NOT_DELETE});
     });
   }
 };
