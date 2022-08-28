@@ -223,7 +223,7 @@ const makeConnectionRequestToAdmin = async (req, res) => {
       },
       {
         listOfDatabases: listOfDatabases,
-        requestStatus:"Un-resolved"
+        requestStatus:"Un-resolved",
       },
       {
         nre: true,
@@ -275,9 +275,9 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
                 temp.push(ele);
               });
             });
+            temp = [...new Set(temp)]
 
-            url.listOfDatabases = temp.map((item) => item);
-            console.log(url);
+            url.listOfDatabases = temp
             resolve(url);
           });
         });
@@ -286,10 +286,19 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
       const promises = listOfHosts.map(fetchIndividualUrlData);
       const results = Promise.all(promises);
       results.then((data) => {
+        console.log("data",data[0].listOfDatabases)
+        let temp=[] 
+        data.forEach((serviceProvider)=>{
+          serviceProvider.listOfDatabases.forEach((host)=>{
+            temp.push(JSON.stringify(host))
+          })
+        })
+        temp=[... new Set(temp)];
+        temp=temp.map((host)=>JSON.parse(host));
         res.status(200).send({
           responseMessage: "Successfully loaded the list of hosts..",
           responseCode: FETCHED,
-          responsePayload: data,
+          responsePayload: temp,
         });
       });
     } else {

@@ -6,6 +6,7 @@ const fetch = require('cross-fetch')
 const notifyHostForNewJob=(hostId,query,databaseName,requestId,secretKey,adminId)=>{
     return new Promise((resolve, reject) => {
         console.log("notifyHostForNewJob")
+
         get_host_info_list_cache(hostId).then(async (host)=>{
           console.log("Host to who going to notify",host)
           if(host!=null){
@@ -28,13 +29,14 @@ const notifyHostForNewJob=(hostId,query,databaseName,requestId,secretKey,adminId
           });
           const convertedResponse = response.json();
           resolve(convertedResponse)    
-          }else{
-            console.log("Not such host found")
-            reject(null)
+          }
+          else{
+            // console.log("Not such host found")
+            reject("Host is null .. response by :get_host_info_list_cache")
           }
         }).catch((error)=>{
-            console.log("No such host found",error)
-            reject(null)
+            // console.log("No such host found",error)
+            reject("Found no specified host by get_host_info_list_cache()")
         })
 
         // resolve("Notified host with completing the request.")       

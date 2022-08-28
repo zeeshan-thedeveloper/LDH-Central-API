@@ -45,7 +45,6 @@ const getHostAccessUrlToken=(req, res)=>{
 }
 
 const executeMysqlQuery=async (req, res)=>{
-
   const {secretKey,hostAccessUrl,query,databaseName} = req.body
 
   const response = ()=>{
@@ -68,45 +67,51 @@ const executeMysqlQuery=async (req, res)=>{
             sendMySQLQueryToHost(query,databaseName,hostId,requestId,secretKey,adminId);
             console.log("Notified and sent the request with request id ",requestId);
             // Now look for request .. if that is resolved or not.
-            const response = await checkForMYSQLRequestStatus(requestId);
-            console.log(response)
-            resolve(response);//we need to send query response.
+            const responseAfterResolving = await checkForMYSQLRequestStatus(requestId);
+            console.log("responseAfterResolving from checkForMYSQLRequestStatus",responseAfterResolving)
+            resolve(responseAfterResolving);//we need to send query response.
           }else{
-            // host could be found in any cache. .. need to restart the host application in this case.
+            // host could be  found in any cache. .. need to restart the host application in this case.
             console.log("can not find host in cache")
             reject(null);
           }
         }
       },(err)=>{
         console.log("Error while  checkIfHostIsConnectedAndOnline",err)
-        reject(null);
+        reject(err);
       })
       
     })
   }
 
   response().then((success)=>{
-    console.log("Response -1 : ",success);
+    
     if(success){
-      res.send({
+      console.log("Response -1",success);
+      res.status(200).send({
         responseMessage:"Successfully resolved the query with response  "+success,
         responsePayload:success
       })
-    }else{
+    }
+    else{
       //remove from cache.
       let hostId = hostAccessUrl.split("/")[2]; 
       removeItemFrom_available_and_connected_host_list_cache(null,hostId);
-      res.send({
+      res.status(200).send({
         responseMessage:"It looks like host is down currently so try later.  ",
         responsePayload:success
       })
     }
-  },(fail)=>{
+  }
+  ,(fail)=>{
+    console.log(fail)
+    console.log("here i am in fail")
     res.send({
       responseMessage:"could not successfully resolved the query with response  ",
       responsePayload:fail
     })
-  })
+  }
+  )
 }
 
 const getTotalNumberOfRemoteAccessUrlsByAdminId = async (req, res) => {

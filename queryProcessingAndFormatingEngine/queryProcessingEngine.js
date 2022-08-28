@@ -19,15 +19,15 @@ const checkIfHostIsConnectedAndOnline=(hostId,query,databaseName,requestId,secre
         console.log("Notifying the host")    
         notifyHostForNewJob(hostId,query,databaseName,requestId,secretKey,adminId).then((data)=>{
             if(data!=null){
-                console.log("resolved notifying")
+                // console.log("resolved notifying")
                 resolve(true)
             }else{
-                console.log("could not find the host")
-                reject(false)
+                // console.log("could not find the host")
+                reject("Could not find the host in record")
             }
         },(err)=>{
-            console.log("Error occurred")
-            reject(null)
+            // console.log("Error occurred",err)
+            reject("Error while notifying host.!!")
         })
 
         }
@@ -35,7 +35,7 @@ const checkIfHostIsConnectedAndOnline=(hostId,query,databaseName,requestId,secre
 }
 
 const sendMySQLQueryToHost=(query,databaseName,hostId,requestId,secretKey,adminId)=>{
-    console.log("sendMySQLQueryToHost")
+    // console.log("sendMySQLQueryToHost")
     // const requestId = uuidv1();
     emiter.emit(events.SEND_MYSQL_QUERY_TO_HOST,hostId,{
         query,databaseName,hostId,requestId,secretKey,adminId

@@ -214,8 +214,14 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
     developers_users_schema.findOne({ email: secretKey }, async (err, data) => {
       if (data) {
         let flag = true;
-        await data.allowedHostAccessUrls.map((element) => {
-          if (element.accessRole == "1201") {
+        let accessRole = null;
+        data.allowedHostAccessUrls.forEach((host) => {
+          if ((adminId = host.adminId)) {
+            accessRole = host.accessRole;
+          }
+        });
+        if (accessRole) {
+          if (accessRole == "1201") {
             //read only
             if (startingKeyWord == readOnlyOperators[0]) {
               next();
@@ -288,7 +294,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }
               );
             }
-          } else if (element.accessRole == "1202") {
+          } else if (accessRole == "1202") {
             //write only
             if (
               startingKeyWord == writeOnlyOperators[0] ||
@@ -358,7 +364,8 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 }
               );
             }
-          } else if (element.accessRole == "1203") {
+          }
+            else if (accessRole == "1203") {
             //read write only
             if (
               startingKeyWord == writeOnlyOperators[0] ||
@@ -407,7 +414,9 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
               responseCode: ERROR_IN_MIDDLEWARE,
             });
           }
-        });
+        }
+
+        
       } else {
         res.status(502).send({
           responseMessage: "Invalid secret key",
@@ -532,9 +541,10 @@ const isApiKeyValid = (req, res, next) => {
             { apiKey: apiKey },
             async (err, adminSendingRequest) => {
               if (adminSendingRequest) {
-                const urlDetails = await remote_database_endpoints_schema.findOne({
-                  urlId: urlId,
-                });
+                const urlDetails =
+                  await remote_database_endpoints_schema.findOne({
+                    urlId: urlId,
+                  });
                 // secretKey, hostAccessUrl, query, databaseName
                 req.body.secretKey = adminSendingRequest.email;
                 req.body.hostAccessUrl = urlDetails.hostUrl;

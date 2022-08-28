@@ -1,4 +1,6 @@
-const { admin_users_schema } = require("../mongodb/schemas/admin-schemas/admin-users");
+const {
+  admin_users_schema,
+} = require("../mongodb/schemas/admin-schemas/admin-users");
 const {
   developers_users_schema,
 } = require("../mongodb/schemas/consumer-schemas/developer-users");
@@ -11,7 +13,9 @@ const {
 const {
   denied_requests_history_schema,
 } = require("../mongodb/schemas/request-history-schema/denied-request-history-schema");
-const { resolved_requests_history_schema } = require("../mongodb/schemas/request-history-schema/resolved-request-history-schema");
+const {
+  resolved_requests_history_schema,
+} = require("../mongodb/schemas/request-history-schema/resolved-request-history-schema");
 const {
   FETCHED,
   COULD_NOT_FETCH,
@@ -72,7 +76,6 @@ const getListOfDevelopersRequestsByAdminId = (req, res) => {
             responsePayload: response,
           });
         });
-
       } else {
         res.status(200).send({
           responseMessage: "List of connection requests could not fetched",
@@ -166,11 +169,45 @@ const updateStatusOfDevConReq = async (req, res) => {
     // -----------------------------
 
     if (requestStatus == "Accept") {
-      const updatedRecord = await developers_users_schema.findOneAndUpdate(
-        { _id: record.developerId },
-        { $push: { allowedHostAccessUrls: record } },
-        { new: true }
-      );
+      //record is to be replaced.
+      // const updatedRecord = await developers_users_schema.findOneAndUpdate(
+      //   { _id: record.developerId },
+      //   { $push: { allowedHostAccessUrls: record } },
+      //   { new: true }
+      // );
+
+      const developer = await developers_users_schema.findOne({
+        _id: record.developerId,
+      });
+      
+      let isAlreadyConnected=false;
+      // let targetIndex=0;
+      let updatedAllowedUrls = developer.allowedHostAccessUrls.map((url,index) => {
+        if (url.adminId == record.adminId) {
+          isAlreadyConnected=true;
+          // targetIndex=0;
+          return record;
+        } else {
+          return url;
+        }
+      });
+
+      if(!isAlreadyConnected)
+      { 
+        updatedAllowedUrls.push(record);
+      }
+
+      let updatedRecord=null;
+
+     
+      console.log("updating the updatedAllowedUrls ",updatedAllowedUrls)
+      updatedRecord = await developers_users_schema.findOneAndUpdate(
+          { _id: record.developerId },
+          { allowedHostAccessUrls: updatedAllowedUrls },
+          { new: true }
+        );
+      
+
       if (updatedRecord) {
         res.status(200).send({
           responseMessage: " Connection Status updated successfully",
@@ -178,11 +215,27 @@ const updateStatusOfDevConReq = async (req, res) => {
           responsePayload: record,
         });
       } else {
-        res.status(200).send({
-          responseMessage: " Connection Status could not updated successfully",
-          responseCode: DATA_NOT_UPDATED,
-          responsePayload: record,
-        });
+
+        updatedRecord = await developers_users_schema.findOneAndUpdate(
+          { _id: record.developerId },
+          { $push: { allowedHostAccessUrls: record } },
+          { new: true }
+        );
+
+        if (updatedRecord) {
+          res.status(200).send({
+            responseMessage: " Connection Status updated successfully",
+            responseCode: DATA_UPDATED,
+            responsePayload: record,
+          });
+        } else {
+          res.status(200).send({
+            responseMessage:
+              " Connection Status could not updated successfully",
+            responseCode: DATA_NOT_UPDATED,
+            responsePayload: record,
+          });
+        }
       }
     } else if (requestStatus == "Decline") {
       const updatedRecord = await developers_users_schema.findOneAndUpdate(
@@ -220,25 +273,39 @@ const getListOfDeniedRequestsByAdminId = async (req, res) => {
     .find({ adminId: adminId })
     .sort({ requestId: -1 });
   if (data) {
-      const getData=(request)=>{
-        return new Promise(async(resolve,reject)=>{
-          const hostData =await host_users_schema.findOne({hostId:request.requestTargetHost})
-          const dev =await developers_users_schema.findOne({email:request.requestSender});
-          if(dev){
-            resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName,hostData:hostData})
-          }else{
-           const adm =await admin_users_schema.findOne({email:request.requestSender}); 
-           resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName,hostData:hostData})       
-          }
-        })
-    }
+    const getData = (request) => {
+      return new Promise(async (resolve, reject) => {
+        const hostData = await host_users_schema.findOne({
+          hostId: request.requestTargetHost,
+        });
+        const dev = await developers_users_schema.findOne({
+          email: request.requestSender,
+        });
+        if (dev) {
+          resolve({
+            request: request,
+            requestSenderName: dev.firstName + " " + dev.lastName,
+            hostData: hostData,
+          });
+        } else {
+          const adm = await admin_users_schema.findOne({
+            email: request.requestSender,
+          });
+          resolve({
+            request: request,
+            requestSenderName: adm.firstName + " " + adm.lastName,
+            hostData: hostData,
+          });
+        }
+      });
+    };
     const fetchDeveloperData = (listOfRequests) => {
       return new Promise((resolve, reject) => {
         const promises = listOfRequests.map(getData);
         const results = Promise.all(promises);
-        results.then((data)=>{
-            resolve(data)
-        })
+        results.then((data) => {
+          resolve(data);
+        });
       });
     };
     fetchDeveloperData(data).then((data) => {
@@ -263,26 +330,39 @@ const getListOfResolvedRequestsByAdminId = async (req, res) => {
     .find({ adminId: adminId })
     .sort({ requestId: -1 });
   if (data) {
-
-      const getData=(request)=>{
-        return new Promise(async(resolve,reject)=>{
-           const hostData =await host_users_schema.findOne({hostId:request.requestTargetHost})
-           const dev =await developers_users_schema.findOne({email:request.requestSender});
-           if(dev){
-             resolve ( {request:request,requestSenderName:dev.firstName+" "+dev.lastName,hostData:hostData})
-           }else{
-            const adm =await admin_users_schema.findOne({email:request.requestSender}); 
-            resolve ( {request:request,requestSenderName:adm.firstName+" "+adm.lastName,hostData:hostData})       
-           }
-        })
-    }
+    const getData = (request) => {
+      return new Promise(async (resolve, reject) => {
+        const hostData = await host_users_schema.findOne({
+          hostId: request.requestTargetHost,
+        });
+        const dev = await developers_users_schema.findOne({
+          email: request.requestSender,
+        });
+        if (dev) {
+          resolve({
+            request: request,
+            requestSenderName: dev.firstName + " " + dev.lastName,
+            hostData: hostData,
+          });
+        } else {
+          const adm = await admin_users_schema.findOne({
+            email: request.requestSender,
+          });
+          resolve({
+            request: request,
+            requestSenderName: adm.firstName + " " + adm.lastName,
+            hostData: hostData,
+          });
+        }
+      });
+    };
     const fetchDeveloperData = (listOfRequests) => {
       return new Promise((resolve, reject) => {
         const promises = listOfRequests.map(getData);
         const results = Promise.all(promises);
-        results.then((data)=>{
-            resolve(data)
-        })
+        results.then((data) => {
+          resolve(data);
+        });
       });
     };
 
@@ -302,12 +382,10 @@ const getListOfResolvedRequestsByAdminId = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getListOfDevelopersRequestsByAdminId,
   updateStatusOfDevConReq,
   getListOfDevelopersAccountsByAdminId,
   getListOfDeniedRequestsByAdminId,
   getListOfResolvedRequestsByAdminId,
-  
 };

@@ -26,7 +26,6 @@ module.exports = {
       global.globalSocket.emit(hostId+"_pingChannel");
     });
     
-
     emiter.on(events.INIT_CACHE, () => {
       requestsListCache.put("requestsListCache", []);
       admin_accounts_cache.put("admin_accounts_cache", []);
