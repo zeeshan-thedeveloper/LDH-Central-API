@@ -89,7 +89,7 @@ const executeMysqlQuery=async (req, res)=>{
     if(success){
       console.log("Response -1",success);
       res.status(200).send({
-        responseMessage:"Successfully resolved the query with response  "+success,
+        responseMessage:"Successfully resolved the query with response  "+JSON.stringify(success),
         responsePayload:success
       })
     }
