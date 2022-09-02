@@ -13,6 +13,8 @@ const {
 const {
   remote_database_endpoints_schema,
 } = require("../mongodb/schemas/remote-database-endpoints/remote-database-endpoints");
+const { denied_requests_history_schema } = require("../mongodb/schemas/request-history-schema/denied-request-history-schema");
+const { resolved_requests_history_schema } = require("../mongodb/schemas/request-history-schema/resolved-request-history-schema");
 
 const { generateTokenWithId } = require("../token-manager/token-manager");
 const {
@@ -399,6 +401,20 @@ const getTotalNumberOfConnectedDevelopersByAdminId = async (req, res) => {
     });
   }
 };
+const getMajorCounts=async(req,res)=>{
+  let numberOfDevelopers =await developers_users_schema.find({}).count();
+  let numberHosts =await host_users_schema.find({}).count();
+  let numberOfResolvedRequests =await resolved_requests_history_schema.find({}).count();
+  let numberOfDeniedRequests =await denied_requests_history_schema.find({}).count();
+  res.status(200).send({
+    responseMessage:"Summary",
+    responsePayload:{
+      numberHosts,
+      numberOfRequests:numberOfDeniedRequests+numberOfResolvedRequests,
+      numberOfDevelopers
+    }
+  })
+}
 
 module.exports = {
   getListOfServiceProviders,
@@ -406,4 +422,5 @@ module.exports = {
   getListOfActiveHostsByDeveloperId,
   generateTokenForDeveloper,
   getTotalNumberOfConnectedDevelopersByAdminId,
+  getMajorCounts
 };

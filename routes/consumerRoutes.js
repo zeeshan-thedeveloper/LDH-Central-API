@@ -26,7 +26,7 @@ consumer.post("/getTotalNumberOfConnectedHostsByDeveloperId",hostController.getT
 consumer.post("/getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId",remoteDatabaseAccessUrl.getTotalNumberOfAllowedRemoteDatabaseAccessUrlsByDeveloperId)
 consumer.post("/getTotalNumberOfEntertainedRequestsByDeveloperEmail",hostAccessUrlController.getTotalNumberOfEntertainedRequestsByDeveloperEmail)
 consumer.post("/getTotalNumberOfDeniedRequestsByDeveloperEmail",hostAccessUrlController.getTotalNumberOfDeniedRequestsByDeveloperEmail)
-
+consumer.get("/getMajorCounts",consumerLayerControllers.getMajorCounts);
 module.exports = {
     consumer
 };
