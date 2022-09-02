@@ -118,8 +118,8 @@ app.get(
   passport.authenticate("github", { scope: ["user:email"] })
 );
 
-app.get("/", (req, res) => {
-  res.send("its working");
+app.get("/check-central-api-status", (req, res) => {
+  res.send({responseMessage:"Its in running condition",responseCode:0});
 });
 
 // Authentication callbacks

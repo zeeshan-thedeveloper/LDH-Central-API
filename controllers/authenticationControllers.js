@@ -61,7 +61,7 @@ const onGoogleAuthSucess = (req, res) => {
   emiter.emit(events.ADD_ITEM_admin_account_cache, req.user);
   const user_Id = encrypt(req.user.id);
   res.redirect(
-    `${FRONT_END_BASE_URL}/Authentication/SignIn?id=${
+    `${FRONT_END_BASE_URL}/Authentication?id=${
       user_Id != undefined ? user_Id : ""
     }&authType=google`
   );
@@ -93,7 +93,7 @@ const onGithubAuthSucess = (req, res) => {
   const user_Id = encrypt(req.user.nodeId);
 
   res.redirect(
-    `${FRONT_END_BASE_URL}/Authentication/SignIn?id=${
+    `${FRONT_END_BASE_URL}/Authentication?id=${
       user_Id != undefined ? user_Id : ""
     }&authType=github`
   );
@@ -382,7 +382,9 @@ const loginToAccount = (req, res) => {
               });
             } else {
               res.status(200).send({
-                responseMessage: "Did not find the record in central database",
+                // responseMessage: "Did not find the record in central database",
+                
+                responseMessage: "There is not "+accountType+" account type record with this email",
                 responseCode: COULD_NOT_LOGIN,
                 responsePayload: null,
               });
