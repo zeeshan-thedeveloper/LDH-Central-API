@@ -589,7 +589,9 @@ const getListOfAdminAccounts = (req, res) => {
           const results = Promise.all(promises);
           results.then((resolvedData) => {
             let listOfConnectedHosts = resolvedData.map((host) => {
+              if(host)
               if (host.hostId == hostId) return host;
+              else return null
             });
             const recordToReturn = {
               id: admin._id,

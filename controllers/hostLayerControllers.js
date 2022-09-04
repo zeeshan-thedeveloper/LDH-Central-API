@@ -88,7 +88,7 @@ const addHostInRequestList = (req, res) => {
       });
     } else {
       res.status(200).send({
-        responseMessage: " Already request",
+        responseMessage: " You have already requested this service manager",
         responseCode: ALREADY_CREATED_ACCOUNT,
         responsePayload: data,
       });
