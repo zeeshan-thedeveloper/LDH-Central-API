@@ -201,7 +201,7 @@ const isUserAllowedToUseTheUrl = (req, res, next) => {
 
 const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
   const readOnlyOperators = ["select"];
-  const writeOnlyOperators = ["delete", "drop", "update"];
+  const writeOnlyOperators = ["insert","delete", "drop", "update","create","use"];
 
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
@@ -228,7 +228,10 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             } else if (
               startingKeyWord == writeOnlyOperators[0] ||
               startingKeyWord == writeOnlyOperators[1] ||
-              startingKeyWord == writeOnlyOperators[2]
+              startingKeyWord == writeOnlyOperators[2] ||
+              startingKeyWord == writeOnlyOperators[3] ||
+              startingKeyWord == writeOnlyOperators[4] ||
+              startingKeyWord == writeOnlyOperators[5]
             ) {
               addRequestInDeniedRequestHistory(
                 requestId,
@@ -272,7 +275,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 getCurrentDataAndTime(),
                 JSON.stringify({
                   statusMessage:
-                    "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                    "Please make sure you use INSERT,SELECT,Update,Delete,Create,Use or Drop key words in sql query",
                   statusCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
                 }),
                 false,
@@ -281,7 +284,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 (data) => {
                   res.status(502).send({
                     responseMessage:
-                      "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                      "Please make sure you use INSERT,SELECT,Update,Delete,Create,Use or Drop key words in sql query",
                     responseCode: UN_AUTHORIZED_TO_PERFORM_OPERATION,
                   });
                 },
@@ -299,7 +302,10 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
             if (
               startingKeyWord == writeOnlyOperators[0] ||
               startingKeyWord == writeOnlyOperators[1] ||
-              startingKeyWord == writeOnlyOperators[2]
+              startingKeyWord == writeOnlyOperators[2] ||
+              startingKeyWord == writeOnlyOperators[3] ||
+              startingKeyWord == writeOnlyOperators[4] ||
+              startingKeyWord == writeOnlyOperators[5]
             ) {
               next();
             } else if (startingKeyWord == readOnlyOperators[0]) {
@@ -371,6 +377,9 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
               startingKeyWord == writeOnlyOperators[0] ||
               startingKeyWord == writeOnlyOperators[1] ||
               startingKeyWord == writeOnlyOperators[2] ||
+              startingKeyWord == writeOnlyOperators[3] ||
+              startingKeyWord == writeOnlyOperators[4] ||
+              startingKeyWord == writeOnlyOperators[5] ||
               startingKeyWord == readOnlyOperators[0]
             ) {
               next();
@@ -386,7 +395,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 getCurrentDataAndTime(),
                 JSON.stringify({
                   statusMessage:
-                    "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                    "Please make sure you use INSERT,SELECT,Update,Delete,Create,Use or Drop key words in sql query",
                   statusCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
                 }),
                 false,
@@ -395,7 +404,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
                 (data) => {
                   res.status(502).send({
                     responseMessage:
-                      "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+                      "Please make sure you use INSERT,SELECT,Update,Delete,Create,Use or Drop key words in sql query",
                     responseCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
                   });
                 },
@@ -437,7 +446,7 @@ const isUserAllowedToPerformRequestedQuery = (req, res, next) => {
 
 const processAdminQuery = (req, res, next) => {
   const readOnlyOperators = ["select"];
-  const writeOnlyOperators = ["delete", "drop", "update"];
+  const writeOnlyOperators = ["insert","delete", "drop", "update","create","use"];
   const { secretKey, hostAccessUrl, query, databaseName } = req.body;
   let hostId = hostAccessUrl.split("/")[2];
   let adminId = hostAccessUrl.split("/")[3];
@@ -449,6 +458,10 @@ const processAdminQuery = (req, res, next) => {
     startingKeyWord == writeOnlyOperators[0] ||
     startingKeyWord == writeOnlyOperators[1] ||
     startingKeyWord == writeOnlyOperators[2] ||
+    startingKeyWord == writeOnlyOperators[3] ||
+    startingKeyWord == writeOnlyOperators[3] ||
+    startingKeyWord == writeOnlyOperators[4] ||
+    startingKeyWord == writeOnlyOperators[5] ||
     startingKeyWord == readOnlyOperators[0]
   ) {
     next();
@@ -464,7 +477,7 @@ const processAdminQuery = (req, res, next) => {
       getCurrentDataAndTime(),
       JSON.stringify({
         statusMessage:
-          "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+          "Please make sure you use SELECT,Update,Delete,Create,Use or Drop key words in sql query",
         statusCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
       }),
       false,
@@ -473,7 +486,7 @@ const processAdminQuery = (req, res, next) => {
       (data) => {
         res.status(502).send({
           responseMessage:
-            "Please make sure you use SELECT,Update,Delete or Drop key words in sql query",
+            "Please make sure you use SELECT,Update,Delete,Create,Use or Drop key words in sql query",
           responseCode: INVALID_OPERATION_KEY_WORDS_IN_QUERY,
         });
       },

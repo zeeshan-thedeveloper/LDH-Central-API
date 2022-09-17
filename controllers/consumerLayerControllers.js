@@ -288,7 +288,7 @@ const getListOfActiveHostsByDeveloperId = (req, res) => {
       const promises = listOfHosts.map(fetchIndividualUrlData);
       const results = Promise.all(promises);
       results.then((data) => {
-        console.log("data",data[0].listOfDatabases)
+        // console.log("data",data[0].listOfDatabases)
         let temp=[] 
         data.forEach((serviceProvider)=>{
           serviceProvider.listOfDatabases.forEach((host)=>{

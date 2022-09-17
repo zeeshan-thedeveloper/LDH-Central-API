@@ -89,8 +89,8 @@ const executeMysqlQuery=async (req, res)=>{
     if(success){
       console.log("Response -1",success);
       res.status(200).send({
-        responseMessage:"Successfully resolved the query with response  "+JSON.stringify(success  ),
-        responsePayload:success
+        responseMessage:"Successfully resolved the query",
+        responsePayload:success.response
       })
     }
     else{
@@ -99,13 +99,12 @@ const executeMysqlQuery=async (req, res)=>{
       removeItemFrom_available_and_connected_host_list_cache(null,hostId);
       res.status(200).send({
         responseMessage:"It looks like host is down currently so try later.  ",
-        responsePayload:success
+        responsePayload:null
       })
     }
   }
   ,(fail)=>{
-    console.log(fail)
-    console.log("here i am in fail")
+    
     res.send({
       responseMessage:"could not successfully resolved the query with response  ",
       responsePayload:fail

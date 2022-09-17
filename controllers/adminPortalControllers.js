@@ -153,6 +153,7 @@ const updateStatusOfDevConReq = async (req, res) => {
     "isAutoAccessUrlTokenGenerationAllowed",
     isAutoAccessUrlTokenGenerationAllowed
   );
+  
   const record = await dev_admin_con_schema.findOneAndUpdate(
     { _id: requestId },
     {

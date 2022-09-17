@@ -563,7 +563,7 @@ const deleteAccount = async (req, res) => {
 };
 
 const getListOfAdminAccounts = (req, res) => {
-  const { hostId } = req.body;
+  const { hostId,hostName } = req.body;
   console.log("here is host id " + hostId);
   admin_users_schema.find({}, (err, data) => {
     if (err) {
@@ -587,11 +587,13 @@ const getListOfAdminAccounts = (req, res) => {
         return new Promise((resolve, reject) => {
           const promises = admin.connectedHostList.map(fetchTheCompleteHost);
           const results = Promise.all(promises);
-          results.then((resolvedData) => {
+          results.then(async(resolvedData) => {
+            //check if it exists in admin_con .. hostName@adminEmail
+           
             let listOfConnectedHosts = resolvedData.map((host) => {
               if(host)
               if (host.hostId == hostId) return host;
-              else return null
+              // else return null
             });
             const recordToReturn = {
               id: admin._id,
