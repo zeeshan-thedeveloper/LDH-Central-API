@@ -47,7 +47,7 @@ const addHostInRequestList = (req, res) => {
           url: `/${hostName}/${hostId}/${adminId}`,
           numberOfHits: 0,
         },
-      };
+      }; 
       // Creating account for host
       host_users_schema.create(dataToInsert, async (err, insertedData) => {
         console.log(err)
